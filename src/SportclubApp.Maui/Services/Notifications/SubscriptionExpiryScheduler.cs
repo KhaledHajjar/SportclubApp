@@ -1,4 +1,5 @@
 using Plugin.LocalNotification;
+using Plugin.LocalNotification.Core.Models;
 using SportclubApp.Shared.Dtos;
 using SportclubApp.Shared.Enums;
 
@@ -35,9 +36,9 @@ public sealed class SubscriptionExpiryScheduler : ISubscriptionExpiryScheduler
             NotificationId = NotificationId,
             Title = "Your subscription expires soon",
             Description = $"Your yearly subscription expires on {subscription.EndUtc.LocalDateTime:d}. Renew to keep going.",
-            Schedule = new NotificationRequestSchedule
+            Schedule =
             {
-                NotifyTime = fireAt.LocalDateTime,
+                NotifyTime = fireAt,
             },
         };
 
