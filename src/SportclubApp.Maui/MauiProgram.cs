@@ -24,12 +24,14 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<ISecureTokenStore, SecureTokenStore>();
         builder.Services.AddSingleton<INavigationService, NavigationService>();
+        builder.Services.AddTransient<AuthDelegatingHandler>();
 
         builder.Services
             .AddHttpClient<ISportclubApi, SportclubApi>(client =>
             {
                 client.BaseAddress = new Uri(AppConstants.ApiBaseUrl);
             })
+            .AddHttpMessageHandler<AuthDelegatingHandler>()
 #if DEBUG
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
@@ -40,6 +42,8 @@ public static class MauiProgram
 
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<LoginPage>();
+        builder.Services.AddTransient<HomeViewModel>();
+        builder.Services.AddTransient<HomePage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

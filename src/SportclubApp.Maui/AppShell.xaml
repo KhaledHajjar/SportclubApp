@@ -10,6 +10,14 @@
     <ShellContent
         Title="Sign in"
         Route="login"
-        ContentTemplate="{DataTemplate views:LoginPage}" />
+        ContentTemplate="{DataTemplate views:LoginPage}"
+        Shell.NavBarIsVisible="False" />
+
+    <TabBar Route="main">
+        <ShellContent
+            Title="Home"
+            Route="home"
+            ContentTemplate="{DataTemplate views:HomePage}" />
+    </TabBar>
 
 </Shell>
