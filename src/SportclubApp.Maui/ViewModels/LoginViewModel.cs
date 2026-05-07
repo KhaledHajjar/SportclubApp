@@ -5,6 +5,7 @@ using SportclubApp.Maui.Services;
 using SportclubApp.Maui.Services.Api;
 using SportclubApp.Maui.Services.Auth;
 using SportclubApp.Maui.Services.Navigation;
+using SportclubApp.Maui.Services.Notifications;
 using SportclubApp.Shared.Auth;
 
 namespace SportclubApp.Maui.ViewModels;
@@ -12,7 +13,8 @@ namespace SportclubApp.Maui.ViewModels;
 public sealed partial class LoginViewModel(
     ISportclubApi api,
     ISecureTokenStore tokenStore,
-    INavigationService navigation) : BaseViewModel
+    INavigationService navigation,
+    ISubscriptionExpiryScheduler expiryScheduler) : BaseViewModel
 {
     [ObservableProperty]
     private string _email = string.Empty;
@@ -39,6 +41,7 @@ public sealed partial class LoginViewModel(
             var response = await api.RefreshAsync(new RefreshRequest(refreshToken));
             await tokenStore.SaveTokensAsync(response.AccessToken, response.RefreshToken);
             UserContext.Current.Apply(response);
+            await ScheduleSubscriptionExpiryAsync();
             await navigation.GoToAsync("//main");
         }
         catch
@@ -66,6 +69,7 @@ public sealed partial class LoginViewModel(
             await tokenStore.SaveTokensAsync(response.AccessToken, response.RefreshToken);
             UserContext.Current.Apply(response);
             Password = string.Empty;
+            await ScheduleSubscriptionExpiryAsync();
             await navigation.GoToAsync("//main");
         }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
@@ -83,6 +87,19 @@ public sealed partial class LoginViewModel(
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    private async Task ScheduleSubscriptionExpiryAsync()
+    {
+        try
+        {
+            var subscription = await api.GetMySubscriptionAsync();
+            await expiryScheduler.EnsureScheduledAsync(subscription);
+        }
+        catch
+        {
+            // Best-effort — never block login on local-notification scheduling.
         }
     }
 }

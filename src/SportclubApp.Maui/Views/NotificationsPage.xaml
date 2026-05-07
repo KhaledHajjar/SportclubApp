@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SportclubApp.Maui.ViewModels"
+             xmlns:dtos="clr-namespace:SportclubApp.Shared.Dtos;assembly=SportclubApp.Shared"
+             x:Class="SportclubApp.Maui.Views.NotificationsPage"
+             x:DataType="vm:NotificationsViewModel"
+             Title="{Binding Title}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Mark all read"
+                     Command="{Binding MarkAllReadCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0"
+                BackgroundColor="#FFF3CD"
+                Padding="12"
+                IsVisible="{Binding HasError}">
+            <Label Text="{Binding ErrorMessage}" />
+        </Border>
+
+        <RefreshView Grid.Row="1"
+                     IsRefreshing="{Binding IsBusy}"
+                     Command="{Binding LoadCommand}">
+            <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="dtos:NotificationDto">
+                        <Grid Padding="16,12" ColumnDefinitions="*">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:NotificationsViewModel}}, Path=OpenCommand}"
+                                    CommandParameter="{Binding}" />
+                            </Grid.GestureRecognizers>
+
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="{Binding Title}" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="{Binding Body}" FontSize="14" />
+                                <Label Text="{Binding CreatedUtc, StringFormat='{0:dddd, MMM d • HH:mm}'}"
+                                       FontSize="11"
+                                       TextColor="Gray" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <ContentView>
+                        <Label Text="No notifications yet."
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               Padding="32" />
+                    </ContentView>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

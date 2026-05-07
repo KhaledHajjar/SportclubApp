@@ -42,4 +42,12 @@ public interface ISportclubApi
     Task<IReadOnlyList<ClassSessionDto>> GetInstructorClassesAsync(CancellationToken ct = default);
 
     Task<IReadOnlyList<ClassParticipantDto>> GetClassParticipantsAsync(Guid classId, CancellationToken ct = default);
+
+    Task<IReadOnlyList<NotificationDto>> GetNotificationsAsync(bool includeRead, CancellationToken ct = default);
+
+    Task<UnreadCountDto> GetUnreadNotificationsCountAsync(CancellationToken ct = default);
+
+    Task MarkNotificationReadAsync(Guid notificationId, CancellationToken ct = default);
+
+    Task MarkAllNotificationsReadAsync(CancellationToken ct = default);
 }

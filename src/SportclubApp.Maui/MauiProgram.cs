@@ -1,9 +1,11 @@
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
+using Plugin.LocalNotification;
 using SportclubApp.Maui.Services.Api;
 using SportclubApp.Maui.Services.Auth;
 using SportclubApp.Maui.Services.Media;
 using SportclubApp.Maui.Services.Navigation;
+using SportclubApp.Maui.Services.Notifications;
 using SportclubApp.Maui.ViewModels;
 using SportclubApp.Maui.Views;
 
@@ -17,6 +19,7 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
+            .UseLocalNotification()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -26,6 +29,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ISecureTokenStore, SecureTokenStore>();
         builder.Services.AddSingleton<INavigationService, NavigationService>();
         builder.Services.AddSingleton<IMediaPickerService, MediaPickerService>();
+        builder.Services.AddSingleton<ISubscriptionExpiryScheduler, SubscriptionExpiryScheduler>();
         builder.Services.AddTransient<AuthDelegatingHandler>();
 
         builder.Services
@@ -60,6 +64,8 @@ public static class MauiProgram
         builder.Services.AddTransient<InstructorClassesPage>();
         builder.Services.AddTransient<InstructorParticipantsViewModel>();
         builder.Services.AddTransient<InstructorParticipantsPage>();
+        builder.Services.AddTransient<NotificationsViewModel>();
+        builder.Services.AddTransient<NotificationsPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

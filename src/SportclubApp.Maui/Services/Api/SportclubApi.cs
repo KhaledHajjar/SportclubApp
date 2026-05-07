@@ -122,6 +122,24 @@ public sealed class SportclubApi(HttpClient http) : ISportclubApi
     public Task<IReadOnlyList<ClassParticipantDto>> GetClassParticipantsAsync(Guid classId, CancellationToken ct = default) =>
         GetAsync<IReadOnlyList<ClassParticipantDto>>($"api/v1/instructors/me/classes/{classId}/participants", ct);
 
+    public Task<IReadOnlyList<NotificationDto>> GetNotificationsAsync(bool includeRead, CancellationToken ct = default) =>
+        GetAsync<IReadOnlyList<NotificationDto>>($"api/v1/notifications?includeRead={(includeRead ? "true" : "false")}", ct);
+
+    public Task<UnreadCountDto> GetUnreadNotificationsCountAsync(CancellationToken ct = default) =>
+        GetAsync<UnreadCountDto>("api/v1/notifications/unread-count", ct);
+
+    public async Task MarkNotificationReadAsync(Guid notificationId, CancellationToken ct = default)
+    {
+        using var response = await http.PostAsync($"api/v1/notifications/{notificationId}/read", content: null, ct);
+        await EnsureSuccessAsync(response, ct);
+    }
+
+    public async Task MarkAllNotificationsReadAsync(CancellationToken ct = default)
+    {
+        using var response = await http.PostAsync("api/v1/notifications/read-all", content: null, ct);
+        await EnsureSuccessAsync(response, ct);
+    }
+
     private async Task<TResponse> GetAsync<TResponse>(string path, CancellationToken ct)
     {
         using var response = await http.GetAsync(path, ct);

@@ -4,6 +4,7 @@ using SportclubApp.Maui.Services;
 using SportclubApp.Maui.Services.Api;
 using SportclubApp.Maui.Services.Auth;
 using SportclubApp.Maui.Services.Navigation;
+using SportclubApp.Maui.Services.Notifications;
 using SportclubApp.Shared.Auth;
 
 namespace SportclubApp.Maui.ViewModels;
@@ -11,7 +12,8 @@ namespace SportclubApp.Maui.ViewModels;
 public sealed partial class HomeViewModel(
     ISportclubApi api,
     ISecureTokenStore tokenStore,
-    INavigationService navigation) : BaseViewModel
+    INavigationService navigation,
+    ISubscriptionExpiryScheduler expiryScheduler) : BaseViewModel
 {
     [ObservableProperty]
     private string _greeting = "You're signed in.";
@@ -45,6 +47,7 @@ public sealed partial class HomeViewModel(
         {
             await tokenStore.ClearAsync();
             UserContext.Current.Clear();
+            await expiryScheduler.CancelAsync();
             IsBusy = false;
             await navigation.GoToAsync("//login");
         }
