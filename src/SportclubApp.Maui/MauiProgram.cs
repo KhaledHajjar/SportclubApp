@@ -2,6 +2,7 @@ using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using SportclubApp.Maui.Services.Api;
 using SportclubApp.Maui.Services.Auth;
+using SportclubApp.Maui.Services.Media;
 using SportclubApp.Maui.Services.Navigation;
 using SportclubApp.Maui.ViewModels;
 using SportclubApp.Maui.Views;
@@ -24,6 +25,7 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<ISecureTokenStore, SecureTokenStore>();
         builder.Services.AddSingleton<INavigationService, NavigationService>();
+        builder.Services.AddSingleton<IMediaPickerService, MediaPickerService>();
         builder.Services.AddTransient<AuthDelegatingHandler>();
 
         builder.Services
@@ -44,6 +46,8 @@ public static class MauiProgram
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<HomeViewModel>();
         builder.Services.AddTransient<HomePage>();
+        builder.Services.AddTransient<ProfileViewModel>();
+        builder.Services.AddTransient<ProfilePage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

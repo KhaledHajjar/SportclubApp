@@ -18,6 +18,10 @@
             Title="Home"
             Route="home"
             ContentTemplate="{DataTemplate views:HomePage}" />
+        <ShellContent
+            Title="Profile"
+            Route="profile"
+            ContentTemplate="{DataTemplate views:ProfilePage}" />
     </TabBar>
 
 </Shell>
