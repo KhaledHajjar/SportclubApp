@@ -13,7 +13,7 @@ public abstract partial class BaseViewModel : ObservableObject
     public partial string? ErrorMessage { get; set; }
 
     [ObservableProperty]
-    public partial string Title { get; set; } = string.Empty;
+    private string _title = string.Empty;
 
     public bool IsNotBusy => !IsBusy;
 

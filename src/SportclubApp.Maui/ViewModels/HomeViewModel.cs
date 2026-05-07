@@ -12,14 +12,14 @@ public sealed partial class HomeViewModel(
     ISecureTokenStore tokenStore,
     INavigationService navigation) : BaseViewModel
 {
+    [ObservableProperty]
+    private string _greeting = "You're signed in.";
+
     public HomeViewModel ConfigureTitle()
     {
         Title = "Welcome";
         return this;
     }
-
-    [ObservableProperty]
-    public partial string Greeting { get; set; } = "You're signed in.";
 
     [RelayCommand]
     private async Task SignOutAsync()

@@ -14,10 +14,10 @@ public sealed partial class LoginViewModel(
     INavigationService navigation) : BaseViewModel
 {
     [ObservableProperty]
-    public partial string Email { get; set; } = string.Empty;
+    private string _email = string.Empty;
 
     [ObservableProperty]
-    public partial string Password { get; set; } = string.Empty;
+    private string _password = string.Empty;
 
     public LoginViewModel ConfigureTitle()
     {
