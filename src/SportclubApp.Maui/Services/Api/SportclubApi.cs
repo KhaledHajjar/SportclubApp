@@ -1,5 +1,8 @@
+using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using SportclubApp.Shared.Auth;
+using SportclubApp.Shared.Dtos;
 
 namespace SportclubApp.Maui.Services.Api;
 
@@ -18,6 +21,49 @@ public sealed class SportclubApi(HttpClient http) : ISportclubApi
     {
         using var response = await http.PostAsJsonAsync("api/v1/auth/logout", request, ct);
         response.EnsureSuccessStatusCode();
+    }
+
+    public Task<MemberDto> GetMeAsync(CancellationToken ct = default) =>
+        GetAsync<MemberDto>("api/v1/members/me", ct);
+
+    public async Task<MemberDto> UpdateMeAsync(UpdateMemberRequest request, CancellationToken ct = default)
+    {
+        using var response = await http.PutAsJsonAsync("api/v1/members/me", request, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<MemberDto>(ct)
+            ?? throw new InvalidOperationException("Empty response body from PUT /members/me.");
+    }
+
+    public async Task<MemberDto> UploadProfilePhotoAsync(Stream content, string fileName, string contentType, CancellationToken ct = default)
+    {
+        using var form = new MultipartFormDataContent();
+        var streamContent = new StreamContent(content);
+        streamContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        form.Add(streamContent, "file", fileName);
+
+        using var response = await http.PostAsync("api/v1/members/me/photo", form, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<MemberDto>(ct)
+            ?? throw new InvalidOperationException("Empty response body from POST /members/me/photo.");
+    }
+
+    public async Task<SubscriptionDto?> GetMySubscriptionAsync(CancellationToken ct = default)
+    {
+        using var response = await http.GetAsync("api/v1/subscriptions/me", ct);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<SubscriptionDto>(ct);
+    }
+
+    private async Task<TResponse> GetAsync<TResponse>(string path, CancellationToken ct)
+    {
+        using var response = await http.GetAsync(path, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<TResponse>(ct)
+            ?? throw new InvalidOperationException($"Empty response body from {path}.");
     }
 
     private async Task<TResponse> PostAsync<TRequest, TResponse>(string path, TRequest body, CancellationToken ct)
