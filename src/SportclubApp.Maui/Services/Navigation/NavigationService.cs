@@ -12,8 +12,8 @@ public sealed class NavigationService : INavigationService
     public Task GoBackAsync() => Shell.Current.GoToAsync("..");
 
     public Task DisplayAlertAsync(string title, string message, string cancel = "OK") =>
-        Shell.Current.DisplayAlert(title, message, cancel);
+        Shell.Current.DisplayAlertAsync(title, message, cancel);
 
     public Task<bool> DisplayConfirmAsync(string title, string message, string accept = "Yes", string cancel = "No") =>
-        Shell.Current.DisplayAlert(title, message, accept, cancel);
+        Shell.Current.DisplayAlertAsync(title, message, accept, cancel);
 }
