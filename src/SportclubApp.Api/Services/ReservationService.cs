@@ -12,6 +12,7 @@ namespace SportclubApp.Api.Services;
 public sealed class ReservationService(
     AppDbContext db,
     ISubscriptionLimitPolicyFactory policyFactory,
+    IWaitingListPromotionService waitingListPromotion,
     TimeProvider time) : IReservationService
 {
     public static readonly TimeSpan ReservationWindow = TimeSpan.FromDays(7);
@@ -122,6 +123,8 @@ public sealed class ReservationService(
 
         reservation.Status = ReservationStatus.Cancelled;
         await db.SaveChangesAsync(ct);
+
+        await waitingListPromotion.TryPromoteHeadAsync(reservation.ClassSessionId, ct);
 
         return ReservationResult.Ok(new ReservationDto(
             Id: reservation.Id,
