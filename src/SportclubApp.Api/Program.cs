@@ -3,6 +3,7 @@ using Scalar.AspNetCore;
 using SportclubApp.Api.Data;
 using SportclubApp.Api.Extensions;
 using SportclubApp.Api.Services;
+using SportclubApp.Api.Services.Policies;
 using SportclubApp.Api.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,9 +15,12 @@ builder.Services.AddSportclubIdentity();
 builder.Services.AddJwtAuth(builder.Configuration);
 builder.Services.AddOpenApiWithBearer();
 
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<ISubscriptionLimitPolicyFactory, SubscriptionLimitPolicyFactory>();
 builder.Services.AddScoped<IPhotoStorageService, PhotoStorageService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IClassSessionService, ClassSessionService>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<DbSeeder>();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 

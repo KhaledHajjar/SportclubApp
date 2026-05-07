@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SportclubApp.Api.Common;
 using SportclubApp.Api.Data;
 using SportclubApp.Shared.Dtos;
 using SportclubApp.Shared.Enums;
@@ -24,7 +25,7 @@ public sealed class SubscriptionService(AppDbContext db) : ISubscriptionService
         int? remainingWeeklyVisits = null;
         if (subscription.Type == SubscriptionType.TwicePerWeek)
         {
-            var (weekStart, weekEnd) = CurrentIsoWeek(now);
+            var (weekStart, weekEnd) = IsoWeek.GetCurrentRange(now);
 
             var visitsThisWeek = await db.Reservations
                 .Where(r => r.MemberId == memberId
@@ -43,17 +44,5 @@ public sealed class SubscriptionService(AppDbContext db) : ISubscriptionService
             EndUtc: subscription.EndUtc,
             IsActive: true,
             RemainingWeeklyVisits: remainingWeeklyVisits);
-    }
-
-    private static (DateTimeOffset Start, DateTimeOffset End) CurrentIsoWeek(DateTimeOffset now)
-    {
-        var today = DateOnly.FromDateTime(now.UtcDateTime);
-        var daysSinceMonday = ((int)today.DayOfWeek + 6) % 7;
-        var monday = today.AddDays(-daysSinceMonday);
-        var nextMonday = monday.AddDays(7);
-
-        return (
-            new DateTimeOffset(monday.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero),
-            new DateTimeOffset(nextMonday.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero));
     }
 }
