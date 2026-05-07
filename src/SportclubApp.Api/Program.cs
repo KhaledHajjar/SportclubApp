@@ -1,5 +1,7 @@
 using FluentValidation;
 using Scalar.AspNetCore;
+using SportclubApp.Api.Common.Events;
+using SportclubApp.Api.Common.Events.Handlers;
 using SportclubApp.Api.Data;
 using SportclubApp.Api.Extensions;
 using SportclubApp.Api.Services;
@@ -17,10 +19,15 @@ builder.Services.AddOpenApiWithBearer();
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ISubscriptionLimitPolicyFactory, SubscriptionLimitPolicyFactory>();
+builder.Services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
+builder.Services.AddScoped<IDomainEventHandler<SlotOpenedEvent>, SlotOpenedEventLoggingHandler>();
 builder.Services.AddScoped<IPhotoStorageService, PhotoStorageService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IClassSessionService, ClassSessionService>();
+builder.Services.AddScoped<IWaitingListService, WaitingListService>();
+builder.Services.AddScoped<IWaitingListPromotionService, WaitingListPromotionService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<DbSeeder>();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 
