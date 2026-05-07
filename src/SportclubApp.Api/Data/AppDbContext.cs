@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SportclubApp.Api.Entities;
-using SportclubApp.Shared.Enums;
 
 namespace SportclubApp.Api.Data;
 
@@ -17,7 +16,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<WaitingListEntry> WaitingListEntries => Set<WaitingListEntry>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
     public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
-    public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
+    public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -93,12 +92,15 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
             b.HasIndex(a => new { a.MemberId, a.AttendedUtc });
         });
 
-        builder.Entity<DeviceToken>(b =>
+        builder.Entity<Notification>(b =>
         {
-            b.Property(d => d.Token).IsRequired().HasMaxLength(500);
-            b.Property(d => d.Platform).HasConversion<int>();
-            b.HasOne(d => d.Member).WithMany(m => m.DeviceTokens).HasForeignKey(d => d.MemberId).OnDelete(DeleteBehavior.Cascade);
-            b.HasIndex(d => d.Token).IsUnique();
+            b.Property(n => n.Type).IsRequired().HasMaxLength(64);
+            b.Property(n => n.Title).IsRequired().HasMaxLength(200);
+            b.Property(n => n.Body).IsRequired().HasMaxLength(1000);
+            b.Property(n => n.DataJson).HasMaxLength(2000);
+            b.HasOne(n => n.Member).WithMany(m => m.Notifications).HasForeignKey(n => n.MemberId).OnDelete(DeleteBehavior.Cascade);
+            b.HasIndex(n => new { n.MemberId, n.ReadUtc, n.CreatedUtc });
+            b.Ignore(n => n.IsRead);
         });
 
         builder.Entity<RefreshToken>(b =>

@@ -6,7 +6,6 @@ using SportclubApp.Api.Data;
 using SportclubApp.Api.Extensions;
 using SportclubApp.Api.Services;
 using SportclubApp.Api.Services.Policies;
-using SportclubApp.Api.Services.Push;
 using SportclubApp.Api.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,18 +17,12 @@ builder.Services.AddSportclubIdentity();
 builder.Services.AddJwtAuth(builder.Configuration);
 builder.Services.AddOpenApiWithBearer();
 
-builder.Services.Configure<FcmOptions>(builder.Configuration.GetSection(FcmOptions.SectionName));
-builder.Services.Configure<ApnsOptions>(builder.Configuration.GetSection(ApnsOptions.SectionName));
-
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ISubscriptionLimitPolicyFactory, SubscriptionLimitPolicyFactory>();
 builder.Services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
-builder.Services.AddSingleton<IPushSender, FcmPushSender>();
-builder.Services.AddSingleton<IPushSender, ApnsPushSender>();
-builder.Services.AddScoped<IPushNotificationDispatcher, PushNotificationDispatcher>();
 builder.Services.AddScoped<IDomainEventHandler<SlotOpenedEvent>, SlotOpenedEventLoggingHandler>();
-builder.Services.AddScoped<IDomainEventHandler<SlotOpenedEvent>, SlotOpenedPushHandler>();
-builder.Services.AddHostedService<SubscriptionExpiryNotifier>();
+builder.Services.AddScoped<IDomainEventHandler<SlotOpenedEvent>, SlotOpenedNotificationHandler>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IPhotoStorageService, PhotoStorageService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IClassSessionService, ClassSessionService>();

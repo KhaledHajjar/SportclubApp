@@ -14,6 +14,6 @@ public sealed class Member : IdentityUser<Guid>
     public ICollection<Reservation> Reservations { get; set; } = [];
     public ICollection<WaitingListEntry> WaitingListEntries { get; set; } = [];
     public ICollection<AttendanceRecord> Attendance { get; set; } = [];
-    public ICollection<DeviceToken> DeviceTokens { get; set; } = [];
+    public ICollection<Notification> Notifications { get; set; } = [];
     public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
 }

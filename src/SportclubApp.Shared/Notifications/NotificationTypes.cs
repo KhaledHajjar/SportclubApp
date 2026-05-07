@@ -1,15 +1,14 @@
-namespace SportclubApp.Shared.Push;
+namespace SportclubApp.Shared.Notifications;
 
-public static class PushNotificationTypes
+public static class NotificationTypes
 {
     public const string SlotOpened = "slot-opened";
     public const string SubscriptionExpiry = "subscription-expiry-warning";
 }
 
-public static class PushPayloadKeys
+public static class NotificationDataKeys
 {
-    public const string Type = "type";
     public const string ClassSessionId = "classSessionId";
-    public const string SubscriptionId = "subscriptionId";
     public const string ReservationId = "reservationId";
+    public const string SubscriptionId = "subscriptionId";
 }
