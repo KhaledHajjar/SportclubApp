@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SportclubApp.Maui.ViewModels"
+             x:Class="SportclubApp.Maui.Views.ClassDetailPage"
+             x:DataType="vm:ClassDetailViewModel"
+             Title="{Binding Title}">
+
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+        <ScrollView>
+            <VerticalStackLayout Padding="24" Spacing="12">
+
+                <Label Text="{Binding ErrorMessage}"
+                       TextColor="Red"
+                       IsVisible="{Binding HasError}" />
+
+                <VerticalStackLayout IsVisible="{Binding HasSession}" Spacing="12">
+                    <Label Text="{Binding WorkoutName}"
+                           FontSize="28"
+                           FontAttributes="Bold" />
+
+                    <Label Text="{Binding StartText}" FontSize="16" />
+
+                    <Label Text="Instructor" FontAttributes="Bold" Margin="0,12,0,0" />
+                    <Label Text="{Binding InstructorName}" />
+
+                    <Label Text="Location" FontAttributes="Bold" />
+                    <Label Text="{Binding LocationName}" />
+
+                    <Label Text="Description" FontAttributes="Bold" />
+                    <Label Text="{Binding WorkoutDescription}" />
+
+                    <BoxView HeightRequest="1" Color="LightGray" Margin="0,12" />
+
+                    <Label Text="{Binding CapacityText}" FontSize="14" />
+                    <Label Text="{Binding StatusText}"
+                           FontSize="16"
+                           FontAttributes="Bold" />
+
+                    <Button Text="Reserve"
+                            IsEnabled="False"
+                            Margin="0,16,0,0" />
+                    <Label Text="Reservation actions land in the next phase."
+                           FontSize="11"
+                           TextColor="Gray"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

@@ -15,6 +15,10 @@
 
     <TabBar Route="main">
         <ShellContent
+            Title="Schedule"
+            Route="schedule"
+            ContentTemplate="{DataTemplate views:SchedulePage}" />
+        <ShellContent
             Title="Home"
             Route="home"
             ContentTemplate="{DataTemplate views:HomePage}" />

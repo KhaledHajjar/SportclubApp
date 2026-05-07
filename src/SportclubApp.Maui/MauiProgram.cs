@@ -48,6 +48,10 @@ public static class MauiProgram
         builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<ProfileViewModel>();
         builder.Services.AddTransient<ProfilePage>();
+        builder.Services.AddTransient<ScheduleViewModel>();
+        builder.Services.AddTransient<SchedulePage>();
+        builder.Services.AddTransient<ClassDetailViewModel>();
+        builder.Services.AddTransient<ClassDetailPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

@@ -58,6 +58,24 @@ public sealed class SportclubApi(HttpClient http) : ISportclubApi
         return await response.Content.ReadFromJsonAsync<SubscriptionDto>(ct);
     }
 
+    public async Task<IReadOnlyList<ClassSessionDto>> GetScheduleAsync(DateTimeOffset from, DateTimeOffset to, CancellationToken ct = default)
+    {
+        var url = $"api/v1/classes?from={Uri.EscapeDataString(from.ToString("o"))}&to={Uri.EscapeDataString(to.ToString("o"))}";
+        var result = await GetAsync<List<ClassSessionDto>>(url, ct);
+        return result;
+    }
+
+    public async Task<ClassSessionDto?> GetClassAsync(Guid classId, CancellationToken ct = default)
+    {
+        using var response = await http.GetAsync($"api/v1/classes/{classId}", ct);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ClassSessionDto>(ct);
+    }
+
     private async Task<TResponse> GetAsync<TResponse>(string path, CancellationToken ct)
     {
         using var response = await http.GetAsync(path, ct);
