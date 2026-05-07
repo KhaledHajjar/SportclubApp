@@ -52,6 +52,8 @@ public static class MauiProgram
         builder.Services.AddTransient<SchedulePage>();
         builder.Services.AddTransient<ClassDetailViewModel>();
         builder.Services.AddTransient<ClassDetailPage>();
+        builder.Services.AddTransient<MyReservationsViewModel>();
+        builder.Services.AddTransient<MyReservationsPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

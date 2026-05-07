@@ -24,4 +24,10 @@ public interface ISportclubApi
     Task<IReadOnlyList<ClassSessionDto>> GetScheduleAsync(DateTimeOffset from, DateTimeOffset to, CancellationToken ct = default);
 
     Task<ClassSessionDto?> GetClassAsync(Guid classId, CancellationToken ct = default);
+
+    Task<ReservationDto> ReserveAsync(Guid classId, CancellationToken ct = default);
+
+    Task<ReservationDto> CancelReservationAsync(Guid reservationId, CancellationToken ct = default);
+
+    Task<IReadOnlyList<ReservationDto>> GetMyReservationsAsync(CancellationToken ct = default);
 }

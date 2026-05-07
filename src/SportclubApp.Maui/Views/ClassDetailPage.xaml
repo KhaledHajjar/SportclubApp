@@ -38,12 +38,13 @@
                            FontAttributes="Bold" />
 
                     <Button Text="Reserve"
-                            IsEnabled="False"
+                            Command="{Binding ReserveCommand}"
                             Margin="0,16,0,0" />
-                    <Label Text="Reservation actions land in the next phase."
-                           FontSize="11"
-                           TextColor="Gray"
-                           HorizontalOptions="Center" />
+
+                    <Label Text="You already have a reservation for this class."
+                           IsVisible="{Binding HasActiveReservation}"
+                           HorizontalOptions="Center"
+                           TextColor="DarkGreen" />
                 </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>

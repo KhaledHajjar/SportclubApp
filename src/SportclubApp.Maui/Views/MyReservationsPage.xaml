@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SportclubApp.Maui.ViewModels"
+             x:Class="SportclubApp.Maui.Views.MyReservationsPage"
+             x:DataType="vm:MyReservationsViewModel"
+             Title="{Binding Title}">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <Border Grid.Row="0"
+                BackgroundColor="#FFF3CD"
+                Padding="12"
+                IsVisible="{Binding HasError}">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <Label Text="{Binding ErrorMessage}" VerticalOptions="Center" />
+                <Button Grid.Column="1"
+                        Text="Retry"
+                        Command="{Binding LoadCommand}"
+                        IsEnabled="{Binding IsNotBusy}" />
+            </Grid>
+        </Border>
+
+        <RefreshView Grid.Row="1"
+                     IsRefreshing="{Binding IsBusy}"
+                     Command="{Binding LoadCommand}">
+            <CollectionView ItemsSource="{Binding Reservations}"
+                            SelectionMode="None">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ReservationItemViewModel">
+                        <Grid Padding="16,12" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MyReservationsViewModel}}, Path=OpenCommand}"
+                                    CommandParameter="{Binding}" />
+                            </Grid.GestureRecognizers>
+
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="{Binding StartText}" FontSize="16" />
+                                <Label Text="{Binding StatusText}"
+                                       FontSize="12"
+                                       TextColor="Gray" />
+                            </VerticalStackLayout>
+
+                            <Button Grid.Column="1"
+                                    Text="Cancel"
+                                    IsVisible="{Binding CanCancel}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MyReservationsViewModel}}, Path=CancelCommand}"
+                                    CommandParameter="{Binding}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+                <CollectionView.EmptyView>
+                    <ContentView>
+                        <Label Text="You haven't reserved any classes yet."
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               Padding="32" />
+                    </ContentView>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

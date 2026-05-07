@@ -19,9 +19,9 @@
             Route="schedule"
             ContentTemplate="{DataTemplate views:SchedulePage}" />
         <ShellContent
-            Title="Home"
-            Route="home"
-            ContentTemplate="{DataTemplate views:HomePage}" />
+            Title="My classes"
+            Route="myReservations"
+            ContentTemplate="{DataTemplate views:MyReservationsPage}" />
         <ShellContent
             Title="Profile"
             Route="profile"

@@ -1,12 +1,15 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SportclubApp.Maui.Services.Api;
+using SportclubApp.Maui.Services.Navigation;
 using SportclubApp.Shared.Dtos;
 
 namespace SportclubApp.Maui.ViewModels;
 
 [QueryProperty(nameof(ClassId), "classId")]
-public sealed partial class ClassDetailViewModel(ISportclubApi api) : BaseViewModel
+public sealed partial class ClassDetailViewModel(
+    ISportclubApi api,
+    INavigationService navigation) : BaseViewModel
 {
     [ObservableProperty]
     private Guid _classId;
@@ -21,11 +24,20 @@ public sealed partial class ClassDetailViewModel(ISportclubApi api) : BaseViewMo
     [NotifyPropertyChangedFor(nameof(CapacityText))]
     [NotifyPropertyChangedFor(nameof(StatusText))]
     [NotifyPropertyChangedFor(nameof(IsFull))]
+    [NotifyPropertyChangedFor(nameof(CanReserve))]
+    [NotifyCanExecuteChangedFor(nameof(ReserveCommand))]
     private ClassSessionDto? _session;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanReserve))]
+    [NotifyCanExecuteChangedFor(nameof(ReserveCommand))]
+    private bool _hasActiveReservation;
 
     public bool HasSession => Session is not null;
 
     public bool IsFull => Session?.IsFull ?? false;
+
+    public bool CanReserve => Session is not null && !Session.IsFull && !HasActiveReservation;
 
     public string WorkoutName => Session?.Workout.Name ?? string.Empty;
 
@@ -75,15 +87,56 @@ public sealed partial class ClassDetailViewModel(ISportclubApi api) : BaseViewMo
         ClearError();
         try
         {
-            Session = await api.GetClassAsync(ClassId);
+            var sessionTask = api.GetClassAsync(ClassId);
+            var reservationsTask = api.GetMyReservationsAsync();
+            await Task.WhenAll(sessionTask, reservationsTask);
+
+            Session = await sessionTask;
             if (Session is null)
             {
                 ErrorMessage = "Class not found.";
+                return;
             }
+
+            var mine = await reservationsTask;
+            HasActiveReservation = mine.Any(r =>
+                r.ClassSessionId == ClassId
+                && r.Status == Shared.Enums.ReservationStatus.Active);
         }
         catch (Exception)
         {
             ErrorMessage = "Could not load this class. Pull down to retry.";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanReserve))]
+    private async Task ReserveAsync()
+    {
+        if (Session is null)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        ClearError();
+        try
+        {
+            await api.ReserveAsync(Session.Id);
+            HasActiveReservation = true;
+            await LoadAsync();
+            await navigation.DisplayAlertAsync("Reserved", "You're booked into this class.");
+        }
+        catch (ApiException ex)
+        {
+            ErrorMessage = ReservationErrorMessages.ForReserve(ex);
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Could not reach the server.";
         }
         finally
         {
