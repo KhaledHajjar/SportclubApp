@@ -14,13 +14,13 @@ public partial class ProfilePage : ContentPage
         BindingContext = _viewModel;
     }
 
-    protected override async void OnAppearing()
+    protected override void OnAppearing()
     {
         base.OnAppearing();
         if (!_loaded)
         {
             _loaded = true;
-            await _viewModel.LoadAsync();
+            _viewModel.LoadCommand.Execute(null);
         }
     }
 }

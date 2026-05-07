@@ -73,14 +73,15 @@ public sealed partial class ProfileViewModel(
         return this;
     }
 
-    public async Task LoadAsync(CancellationToken ct = default)
+    [RelayCommand]
+    private async Task LoadAsync()
     {
         IsBusy = true;
         ClearError();
         try
         {
-            var meTask = api.GetMeAsync(ct);
-            var subTask = api.GetMySubscriptionAsync(ct);
+            var meTask = api.GetMeAsync();
+            var subTask = api.GetMySubscriptionAsync();
             await Task.WhenAll(meTask, subTask);
 
             ApplyMember(await meTask);

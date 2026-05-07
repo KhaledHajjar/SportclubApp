@@ -13,9 +13,16 @@ public sealed class MediaPickerService : IMediaPickerService
             return null;
         }
 
-        var result = source == PhotoSource.Camera
-            ? await MediaPicker.Default.CapturePhotoAsync()
-            : await MediaPicker.Default.PickPhotoAsync();
+        FileResult? result;
+        if (source == PhotoSource.Camera)
+        {
+            result = await MediaPicker.Default.CapturePhotoAsync();
+        }
+        else
+        {
+            var picked = await MediaPicker.Default.PickPhotosAsync();
+            result = picked?.FirstOrDefault();
+        }
 
         if (result is null)
         {
