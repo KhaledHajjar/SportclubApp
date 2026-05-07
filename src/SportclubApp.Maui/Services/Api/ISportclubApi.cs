@@ -30,4 +30,16 @@ public interface ISportclubApi
     Task<ReservationDto> CancelReservationAsync(Guid reservationId, CancellationToken ct = default);
 
     Task<IReadOnlyList<ReservationDto>> GetMyReservationsAsync(CancellationToken ct = default);
+
+    Task<WaitingListEntryDto> JoinWaitingListAsync(Guid classId, CancellationToken ct = default);
+
+    Task<WaitingListEntryDto> LeaveWaitingListAsync(Guid entryId, CancellationToken ct = default);
+
+    Task<IReadOnlyList<WaitingListEntryDto>> GetMyWaitingListAsync(CancellationToken ct = default);
+
+    Task<IReadOnlyList<AttendanceRecordDto>> GetMyAttendanceAsync(int year, CancellationToken ct = default);
+
+    Task<IReadOnlyList<ClassSessionDto>> GetInstructorClassesAsync(CancellationToken ct = default);
+
+    Task<IReadOnlyList<ClassParticipantDto>> GetClassParticipantsAsync(Guid classId, CancellationToken ct = default);
 }

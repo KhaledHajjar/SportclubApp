@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SportclubApp.Maui.Services;
 using SportclubApp.Maui.Services.Api;
 using SportclubApp.Maui.Services.Auth;
 using SportclubApp.Maui.Services.Navigation;
@@ -43,6 +44,7 @@ public sealed partial class HomeViewModel(
         finally
         {
             await tokenStore.ClearAsync();
+            UserContext.Current.Clear();
             IsBusy = false;
             await navigation.GoToAsync("//login");
         }

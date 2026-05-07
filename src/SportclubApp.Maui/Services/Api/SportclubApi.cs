@@ -94,6 +94,34 @@ public sealed class SportclubApi(HttpClient http) : ISportclubApi
     public Task<IReadOnlyList<ReservationDto>> GetMyReservationsAsync(CancellationToken ct = default) =>
         GetAsync<IReadOnlyList<ReservationDto>>("api/v1/reservations/me", ct);
 
+    public async Task<WaitingListEntryDto> JoinWaitingListAsync(Guid classId, CancellationToken ct = default)
+    {
+        using var response = await http.PostAsync($"api/v1/classes/{classId}/waiting-list", content: null, ct);
+        await EnsureSuccessAsync(response, ct);
+        return await response.Content.ReadFromJsonAsync<WaitingListEntryDto>(ct)
+            ?? throw new InvalidOperationException("Empty response body from waiting-list join.");
+    }
+
+    public async Task<WaitingListEntryDto> LeaveWaitingListAsync(Guid entryId, CancellationToken ct = default)
+    {
+        using var response = await http.DeleteAsync($"api/v1/waiting-list/{entryId}", ct);
+        await EnsureSuccessAsync(response, ct);
+        return await response.Content.ReadFromJsonAsync<WaitingListEntryDto>(ct)
+            ?? throw new InvalidOperationException("Empty response body from waiting-list leave.");
+    }
+
+    public Task<IReadOnlyList<WaitingListEntryDto>> GetMyWaitingListAsync(CancellationToken ct = default) =>
+        GetAsync<IReadOnlyList<WaitingListEntryDto>>("api/v1/waiting-list/me", ct);
+
+    public Task<IReadOnlyList<AttendanceRecordDto>> GetMyAttendanceAsync(int year, CancellationToken ct = default) =>
+        GetAsync<IReadOnlyList<AttendanceRecordDto>>($"api/v1/attendance/me?year={year}", ct);
+
+    public Task<IReadOnlyList<ClassSessionDto>> GetInstructorClassesAsync(CancellationToken ct = default) =>
+        GetAsync<IReadOnlyList<ClassSessionDto>>("api/v1/instructors/me/classes", ct);
+
+    public Task<IReadOnlyList<ClassParticipantDto>> GetClassParticipantsAsync(Guid classId, CancellationToken ct = default) =>
+        GetAsync<IReadOnlyList<ClassParticipantDto>>($"api/v1/instructors/me/classes/{classId}/participants", ct);
+
     private async Task<TResponse> GetAsync<TResponse>(string path, CancellationToken ct)
     {
         using var response = await http.GetAsync(path, ct);

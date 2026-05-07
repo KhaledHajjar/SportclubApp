@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:SportclubApp.Maui.Views"
+    xmlns:services="clr-namespace:SportclubApp.Maui.Services"
     Title="Sportclub"
     FlyoutBehavior="Disabled">
 
@@ -22,6 +23,15 @@
             Title="My classes"
             Route="myReservations"
             ContentTemplate="{DataTemplate views:MyReservationsPage}" />
+        <ShellContent
+            Title="History"
+            Route="history"
+            ContentTemplate="{DataTemplate views:HistoryPage}" />
+        <ShellContent
+            Title="Teaching"
+            Route="instructorClasses"
+            ContentTemplate="{DataTemplate views:InstructorClassesPage}"
+            IsVisible="{Binding IsInstructor, Source={x:Static services:UserContext.Current}}" />
         <ShellContent
             Title="Profile"
             Route="profile"

@@ -25,19 +25,35 @@ public sealed partial class ClassDetailViewModel(
     [NotifyPropertyChangedFor(nameof(StatusText))]
     [NotifyPropertyChangedFor(nameof(IsFull))]
     [NotifyPropertyChangedFor(nameof(CanReserve))]
+    [NotifyPropertyChangedFor(nameof(CanJoinWaitingList))]
     [NotifyCanExecuteChangedFor(nameof(ReserveCommand))]
+    [NotifyCanExecuteChangedFor(nameof(JoinWaitingListCommand))]
     private ClassSessionDto? _session;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanReserve))]
+    [NotifyPropertyChangedFor(nameof(CanJoinWaitingList))]
     [NotifyCanExecuteChangedFor(nameof(ReserveCommand))]
+    [NotifyCanExecuteChangedFor(nameof(JoinWaitingListCommand))]
     private bool _hasActiveReservation;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsOnWaitingList))]
+    [NotifyPropertyChangedFor(nameof(CanJoinWaitingList))]
+    [NotifyCanExecuteChangedFor(nameof(JoinWaitingListCommand))]
+    [NotifyCanExecuteChangedFor(nameof(LeaveWaitingListCommand))]
+    private Guid? _waitingListEntryId;
 
     public bool HasSession => Session is not null;
 
     public bool IsFull => Session?.IsFull ?? false;
 
     public bool CanReserve => Session is not null && !Session.IsFull && !HasActiveReservation;
+
+    public bool IsOnWaitingList => WaitingListEntryId.HasValue;
+
+    public bool CanJoinWaitingList =>
+        Session is { IsFull: true } && !HasActiveReservation && !IsOnWaitingList;
 
     public string WorkoutName => Session?.Workout.Name ?? string.Empty;
 
@@ -89,7 +105,8 @@ public sealed partial class ClassDetailViewModel(
         {
             var sessionTask = api.GetClassAsync(ClassId);
             var reservationsTask = api.GetMyReservationsAsync();
-            await Task.WhenAll(sessionTask, reservationsTask);
+            var waitingTask = api.GetMyWaitingListAsync();
+            await Task.WhenAll(sessionTask, reservationsTask, waitingTask);
 
             Session = await sessionTask;
             if (Session is null)
@@ -102,6 +119,9 @@ public sealed partial class ClassDetailViewModel(
             HasActiveReservation = mine.Any(r =>
                 r.ClassSessionId == ClassId
                 && r.Status == Shared.Enums.ReservationStatus.Active);
+
+            var entry = (await waitingTask).FirstOrDefault(w => w.ClassSessionId == ClassId);
+            WaitingListEntryId = entry?.Id;
         }
         catch (Exception)
         {
@@ -133,6 +153,67 @@ public sealed partial class ClassDetailViewModel(
         catch (ApiException ex)
         {
             ErrorMessage = ReservationErrorMessages.ForReserve(ex);
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Could not reach the server.";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanJoinWaitingList))]
+    private async Task JoinWaitingListAsync()
+    {
+        if (Session is null)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        ClearError();
+        try
+        {
+            var entry = await api.JoinWaitingListAsync(Session.Id);
+            WaitingListEntryId = entry.Id;
+            await LoadAsync();
+            await navigation.DisplayAlertAsync("On the list", "We'll notify you if a spot opens.");
+        }
+        catch (ApiException ex)
+        {
+            ErrorMessage = WaitingListErrorMessages.ForJoin(ex);
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Could not reach the server.";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task LeaveWaitingListAsync()
+    {
+        if (WaitingListEntryId is not { } entryId)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        ClearError();
+        try
+        {
+            await api.LeaveWaitingListAsync(entryId);
+            WaitingListEntryId = null;
+            await LoadAsync();
+        }
+        catch (ApiException ex)
+        {
+            ErrorMessage = WaitingListErrorMessages.ForLeave(ex);
         }
         catch (Exception)
         {

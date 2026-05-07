@@ -1,6 +1,7 @@
 using System.Net;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SportclubApp.Maui.Services;
 using SportclubApp.Maui.Services.Api;
 using SportclubApp.Maui.Services.Auth;
 using SportclubApp.Maui.Services.Navigation;
@@ -37,11 +38,13 @@ public sealed partial class LoginViewModel(
         {
             var response = await api.RefreshAsync(new RefreshRequest(refreshToken));
             await tokenStore.SaveTokensAsync(response.AccessToken, response.RefreshToken);
+            UserContext.Current.Apply(response);
             await navigation.GoToAsync("//main");
         }
         catch
         {
             await tokenStore.ClearAsync();
+            UserContext.Current.Clear();
         }
     }
 
@@ -61,6 +64,7 @@ public sealed partial class LoginViewModel(
         {
             var response = await api.LoginAsync(new LoginRequest(Email.Trim(), Password));
             await tokenStore.SaveTokensAsync(response.AccessToken, response.RefreshToken);
+            UserContext.Current.Apply(response);
             Password = string.Empty;
             await navigation.GoToAsync("//main");
         }
