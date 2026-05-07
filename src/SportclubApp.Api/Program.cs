@@ -1,5 +1,6 @@
 using FluentValidation;
 using Scalar.AspNetCore;
+using SportclubApp.Api.Data;
 using SportclubApp.Api.Extensions;
 using SportclubApp.Api.Services;
 using SportclubApp.Api.Validators;
@@ -15,11 +16,21 @@ builder.Services.AddOpenApiWithBearer();
 
 builder.Services.AddScoped<IPhotoStorageService, PhotoStorageService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IClassSessionService, ClassSessionService>();
+builder.Services.AddScoped<DbSeeder>();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 
 var app = builder.Build();
 
 await app.Services.EnsureRolesCreatedAsync();
+
+if (args.Length > 0 && string.Equals(args[0], "seed", StringComparison.OrdinalIgnoreCase))
+{
+    using var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+    await seeder.SeedAsync();
+    return;
+}
 
 if (app.Environment.IsDevelopment())
 {
