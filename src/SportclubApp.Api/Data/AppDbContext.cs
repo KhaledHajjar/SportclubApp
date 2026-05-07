@@ -18,6 +18,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
     public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
     public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -98,6 +99,17 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
             b.Property(d => d.Platform).HasConversion<int>();
             b.HasOne(d => d.Member).WithMany(m => m.DeviceTokens).HasForeignKey(d => d.MemberId).OnDelete(DeleteBehavior.Cascade);
             b.HasIndex(d => d.Token).IsUnique();
+        });
+
+        builder.Entity<RefreshToken>(b =>
+        {
+            b.Property(r => r.Token).IsRequired().HasMaxLength(200);
+            b.Property(r => r.ReplacedByToken).HasMaxLength(200);
+            b.HasOne(r => r.Member).WithMany(m => m.RefreshTokens).HasForeignKey(r => r.MemberId).OnDelete(DeleteBehavior.Cascade);
+            b.HasIndex(r => r.Token).IsUnique();
+            b.Ignore(r => r.IsRevoked);
+            b.Ignore(r => r.IsExpired);
+            b.Ignore(r => r.IsActive);
         });
     }
 }
