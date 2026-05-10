@@ -28,5 +28,9 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>NSCameraUsageDescription</key>
+	<string>SportclubApp needs camera access to take a profile photo.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SportclubApp needs photo library access to choose a profile photo.</string>
 </dict>
 </plist>
