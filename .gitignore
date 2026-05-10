@@ -3,6 +3,14 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Project planning notes — kept locally, not tracked
+PRD/
+
+# Runtime profile photo uploads — keep the directory marker, drop user content
+src/SportclubApp.Api/wwwroot/uploads/*
+!src/SportclubApp.Api/wwwroot/uploads/.gitkeep
+
+
 # User-specific files
 *.rsuser
 *.suo
