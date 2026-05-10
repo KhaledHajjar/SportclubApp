@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SportclubApp.Api.Entities;
 
 namespace SportclubApp.Api.Data;
@@ -18,6 +19,17 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+
+        // SQLite stores DateTimeOffset as TEXT and can't translate comparisons or
+        // ordering on it. Convert to a long (ticks + offset) so EF Core emits
+        // SQL-translatable comparisons.
+        configurationBuilder.Properties<DateTimeOffset>()
+            .HaveConversion<DateTimeOffsetToBinaryConverter>();
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
