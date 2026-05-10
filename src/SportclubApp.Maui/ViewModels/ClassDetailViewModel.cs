@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SportclubApp.Maui.Services.Api;
 using SportclubApp.Maui.Services.Navigation;
+using SportclubApp.Maui.Services.Notifications;
 using SportclubApp.Shared.Dtos;
 
 namespace SportclubApp.Maui.ViewModels;
@@ -9,7 +10,8 @@ namespace SportclubApp.Maui.ViewModels;
 [QueryProperty(nameof(ClassId), "classId")]
 public sealed partial class ClassDetailViewModel(
     ISportclubApi api,
-    INavigationService navigation) : BaseViewModel
+    INavigationService navigation,
+    INotificationsBadgeService badge) : BaseViewModel
 {
     [ObservableProperty]
     private Guid _classId;
@@ -148,6 +150,7 @@ public sealed partial class ClassDetailViewModel(
             await api.ReserveAsync(Session.Id);
             HasActiveReservation = true;
             await LoadAsync();
+            await badge.RefreshAsync();
             await navigation.DisplayAlertAsync("Reserved", "You're booked into this class.");
         }
         catch (ApiException ex)

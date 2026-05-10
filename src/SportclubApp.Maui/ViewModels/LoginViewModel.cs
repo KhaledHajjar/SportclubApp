@@ -14,7 +14,8 @@ public sealed partial class LoginViewModel(
     ISportclubApi api,
     ISecureTokenStore tokenStore,
     INavigationService navigation,
-    ISubscriptionExpiryScheduler expiryScheduler) : BaseViewModel
+    ISubscriptionExpiryScheduler expiryScheduler,
+    INotificationsBadgeService badge) : BaseViewModel
 {
     [ObservableProperty]
     private string _email = string.Empty;
@@ -42,6 +43,7 @@ public sealed partial class LoginViewModel(
             await tokenStore.SaveTokensAsync(response.AccessToken, response.RefreshToken);
             UserContext.Current.Apply(response);
             await ScheduleSubscriptionExpiryAsync();
+            await badge.RefreshAsync();
             await navigation.GoToAsync("//main");
         }
         catch
@@ -70,13 +72,14 @@ public sealed partial class LoginViewModel(
             UserContext.Current.Apply(response);
             Password = string.Empty;
             await ScheduleSubscriptionExpiryAsync();
+            await badge.RefreshAsync();
             await navigation.GoToAsync("//main");
         }
-        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+        catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
         {
             ErrorMessage = "Invalid email or password.";
         }
-        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
+        catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
         {
             ErrorMessage = "Email and password are required.";
         }

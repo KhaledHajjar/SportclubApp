@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SportclubApp.Maui.Services.Api;
 using SportclubApp.Maui.Services.Navigation;
+using SportclubApp.Maui.Services.Notifications;
 using SportclubApp.Shared.Dtos;
 using SportclubApp.Shared.Enums;
 
@@ -10,7 +11,8 @@ namespace SportclubApp.Maui.ViewModels;
 
 public sealed partial class MyReservationsViewModel(
     ISportclubApi api,
-    INavigationService navigation) : BaseViewModel
+    INavigationService navigation,
+    INotificationsBadgeService badge) : BaseViewModel
 {
     public ObservableCollection<ReservationItemViewModel> Reservations { get; } = [];
 
@@ -69,6 +71,7 @@ public sealed partial class MyReservationsViewModel(
         {
             await api.CancelReservationAsync(item.Id);
             await LoadAsync();
+            await badge.RefreshAsync();
         }
         catch (ApiException ex)
         {

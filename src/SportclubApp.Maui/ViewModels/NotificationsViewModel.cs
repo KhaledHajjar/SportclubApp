@@ -11,7 +11,8 @@ namespace SportclubApp.Maui.ViewModels;
 
 public sealed partial class NotificationsViewModel(
     ISportclubApi api,
-    INavigationService navigation) : BaseViewModel
+    INavigationService navigation,
+    INotificationsBadgeService badge) : BaseViewModel
 {
     public ObservableCollection<NotificationDto> Items { get; } = [];
 
@@ -35,8 +36,7 @@ public sealed partial class NotificationsViewModel(
                 Items.Add(n);
             }
 
-            var unread = await api.GetUnreadNotificationsCountAsync();
-            NotificationContext.Current.UnreadCount = unread.Unread;
+            await badge.RefreshAsync();
         }
         catch (Exception)
         {
@@ -99,7 +99,6 @@ public sealed partial class NotificationsViewModel(
         {
             Items.Add(n);
         }
-        var unread = await api.GetUnreadNotificationsCountAsync();
-        NotificationContext.Current.UnreadCount = unread.Unread;
+        await badge.RefreshAsync();
     }
 }

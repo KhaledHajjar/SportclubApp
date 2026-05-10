@@ -30,6 +30,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<INavigationService, NavigationService>();
         builder.Services.AddSingleton<IMediaPickerService, MediaPickerService>();
         builder.Services.AddSingleton<ISubscriptionExpiryScheduler, SubscriptionExpiryScheduler>();
+        builder.Services.AddSingleton<INotificationsBadgeService, NotificationsBadgeService>();
         builder.Services.AddTransient<AuthDelegatingHandler>();
 
         builder.Services
