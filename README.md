@@ -45,8 +45,7 @@ cd src\SportclubApp.Api
 dotnet user-secrets set "Jwt:SigningKey" "$([Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(48)))"
 cd ..\..
 
-# create the SQLite database and seed demo data
-dotnet ef database update --project src/SportclubApp.Api
+# seed demo data — the API auto-migrates the SQLite database on first run
 dotnet run --project src/SportclubApp.Api -- seed
 ```
 
@@ -54,13 +53,31 @@ The seeder is idempotent — re-running it on an already-populated database is a
 
 ## Test users
 
-All seed users use the password **`Password123!`**.
+All seed users use the password **`Test1234!`**.
 
-| Email | Role | Subscription |
-|---|---|---|
-| `alice@sportclub.test` | Member | TwicePerWeek (6 months) |
-| `bob@sportclub.test` | Member | Yearly |
-| `instructor@sportclub.test` | Instructor + Member | — |
+| Email | Role | Subscription | Demonstrates |
+|---|---|---|---|
+| `alice@sportclub.test` | Member | TwicePerWeek | 2x/week limit; cancel her Yoga Tuesday 09:00 reservation to trigger the slot-opened notification flow for Charlie |
+| `bob@sportclub.test` | Member | Yearly (40 days remaining) | 6-week subscription-expiry local notification fires immediately on login |
+| `charlie@sportclub.test` | Member | Unlimited | Head of waitlist for the demo class — receives the slot-opened notification when Alice cancels |
+| `test@test.com` | Member | TwicePerWeek | Quick-login convenience account; second on the demo waitlist |
+| `diana@sportclub.test` | Instructor | — | Instructor view: her teaching schedule and class participants |
+
+Each non-instructor account also has ~5 attendance rows across the past 6 weeks (History tab non-empty), 2 active future reservations (My classes non-empty), and one already-read SlotOpened notification (Notifications tab non-empty).
+
+## Demo flows
+
+### Slot-opened waitlist notification
+
+The seeder creates one Yoga session capped at 2 — the next Tuesday 09:00 — pre-reserved by Alice and Bob, with Charlie at position 1 and Test at position 2 on the waitlist. To trigger the slot-opened flow:
+
+1. Log in as **alice@sportclub.test**, open *My classes*, cancel the Yoga Tuesday 09:00 reservation. (Cancel requires ≥ 1 hour before start; the demo class is always at least 12 hours out.)
+2. Log out, log in as **charlie@sportclub.test**.
+3. The Notifications tab title shows `(1)`. Tap the new entry — it deep-links to the class detail and clears the badge. Charlie also has a fresh active reservation for that class (he was promoted off the waitlist).
+
+### Subscription-expiry local notification
+
+Bob's yearly subscription ends 40 days from seed time, inside the 6-week threshold. Logging in as **bob@sportclub.test** schedules an OS-level local notification immediately via `Plugin.LocalNotification` — visible in the Android emulator's notification drawer (or iOS notification center) once the device clock crosses the scheduled time.
 
 ## Run the API
 
