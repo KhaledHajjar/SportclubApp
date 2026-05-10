@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 
@@ -11,6 +12,7 @@ public static class OpenApiExtensions
         services.AddOpenApi("v1", options =>
         {
             options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+            options.AddOperationTransformer<BearerSecurityRequirementTransformer>();
         });
 
         return services;
@@ -45,19 +47,31 @@ internal sealed class BearerSecuritySchemeTransformer(IAuthenticationSchemeProvi
 
         document.Components ??= new OpenApiComponents();
         document.Components.SecuritySchemes = securitySchemes;
+    }
+}
 
-        if (document.Paths is null)
+internal sealed class BearerSecurityRequirementTransformer : IOpenApiOperationTransformer
+{
+    public Task TransformAsync(
+        OpenApiOperation operation,
+        OpenApiOperationTransformerContext context,
+        CancellationToken cancellationToken)
+    {
+        var metadata = context.Description.ActionDescriptor.EndpointMetadata;
+        if (metadata.OfType<IAllowAnonymous>().Any())
         {
-            return;
+            return Task.CompletedTask;
+        }
+        if (!metadata.OfType<IAuthorizeData>().Any())
+        {
+            return Task.CompletedTask;
         }
 
-        foreach (var operation in document.Paths.Values.SelectMany(path => path.Operations ?? []))
+        operation.Security ??= [];
+        operation.Security.Add(new OpenApiSecurityRequirement
         {
-            operation.Value.Security ??= [];
-            operation.Value.Security.Add(new OpenApiSecurityRequirement
-            {
-                [new OpenApiSecuritySchemeReference("Bearer", document)] = [],
-            });
-        }
+            [new OpenApiSecuritySchemeReference("Bearer", context.Document)] = [],
+        });
+        return Task.CompletedTask;
     }
 }
