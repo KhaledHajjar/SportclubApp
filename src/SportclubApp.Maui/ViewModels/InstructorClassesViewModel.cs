@@ -15,7 +15,7 @@ public sealed partial class InstructorClassesViewModel(
 
     public InstructorClassesViewModel ConfigureTitle()
     {
-        Title = "My classes";
+        Title = "Teaching";
         return this;
     }
 

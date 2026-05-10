@@ -35,20 +35,36 @@ public sealed class InstructorController(AppDbContext db) : ControllerBase
             .OrderBy(c => c.StartUtc)
             .ToListAsync(ct);
 
-        var result = new List<ClassSessionDto>(sessions.Count);
-        foreach (var s in sessions)
+        if (sessions.Count == 0)
         {
-            var reserved = await db.Reservations.CountAsync(
-                r => r.ClassSessionId == s.Id && r.Status == ReservationStatus.Active, ct);
-            var waiting = await db.WaitingListEntries.CountAsync(w => w.ClassSessionId == s.Id, ct);
-            var freeSpots = Math.Max(0, s.Capacity - reserved);
+            return Ok(Array.Empty<ClassSessionDto>());
+        }
 
-            result.Add(new ClassSessionDto(
+        var sessionIds = sessions.Select(s => s.Id).ToList();
+
+        var reservedCounts = await db.Reservations
+            .Where(r => sessionIds.Contains(r.ClassSessionId) && r.Status == ReservationStatus.Active)
+            .GroupBy(r => r.ClassSessionId)
+            .Select(g => new { ClassSessionId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.ClassSessionId, x => x.Count, ct);
+
+        var waitingCounts = await db.WaitingListEntries
+            .Where(w => sessionIds.Contains(w.ClassSessionId))
+            .GroupBy(w => w.ClassSessionId)
+            .Select(g => new { ClassSessionId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.ClassSessionId, x => x.Count, ct);
+
+        var result = sessions.Select(s =>
+        {
+            var reserved = reservedCounts.GetValueOrDefault(s.Id);
+            var waiting = waitingCounts.GetValueOrDefault(s.Id);
+            var freeSpots = Math.Max(0, s.Capacity - reserved);
+            return new ClassSessionDto(
                 s.Id, s.StartUtc, s.Capacity, reserved, waiting, freeSpots, freeSpots == 0,
                 new WorkoutDto(s.Workout.Id, s.Workout.Name, s.Workout.Description, s.Workout.DurationMinutes),
                 new InstructorDto(s.Instructor.Id, s.Instructor.FirstName, s.Instructor.LastName, s.Instructor.Bio),
-                new LocationDto(s.Location.Id, s.Location.Name, s.Location.Address)));
-        }
+                new LocationDto(s.Location.Id, s.Location.Name, s.Location.Address));
+        }).ToList();
 
         return Ok(result);
     }
