@@ -11,7 +11,7 @@
         <CollectionView ItemsSource="{Binding Classes}" SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="dtos:ClassSessionDto">
-                    <Grid Padding="16,12" ColumnDefinitions="*,Auto">
+                    <Grid Padding="{StaticResource ListItemPadding}" ColumnDefinitions="*,Auto">
                         <Grid.GestureRecognizers>
                             <TapGestureRecognizer
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:InstructorClassesViewModel}}, Path=OpenCommand}"
@@ -19,10 +19,10 @@
                         </Grid.GestureRecognizers>
 
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding Workout.Name}" FontSize="16" FontAttributes="Bold" />
+                            <Label Text="{Binding Workout.Name}" Style="{StaticResource ListItemTitle}" />
                             <Label Text="{Binding StartUtc, StringFormat='{0:dddd, MMM d • HH:mm}'}"
-                                   FontSize="12" TextColor="Gray" />
-                            <Label Text="{Binding Location.Name}" FontSize="12" TextColor="Gray" />
+                                   Style="{StaticResource Caption}" />
+                            <Label Text="{Binding Location.Name}" Style="{StaticResource Caption}" />
                         </VerticalStackLayout>
                         <Label Grid.Column="1"
                                Text="{Binding ReservedCount, StringFormat='{0} attending'}"
@@ -33,9 +33,10 @@
             <CollectionView.EmptyView>
                 <ContentView>
                     <Label Text="No classes assigned."
+                           Style="{StaticResource Caption}"
                            HorizontalOptions="Center"
                            VerticalOptions="Center"
-                           Padding="32" />
+                           Padding="{StaticResource SpacingXL}" />
                 </ContentView>
             </CollectionView.EmptyView>
         </CollectionView>

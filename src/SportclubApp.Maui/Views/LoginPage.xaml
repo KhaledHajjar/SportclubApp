@@ -7,16 +7,14 @@
              Title="{Binding Title}"
              Shell.NavBarIsVisible="False">
 
-    <Grid Padding="24" RowDefinitions="*,Auto,*">
-        <VerticalStackLayout Grid.Row="1" Spacing="16">
+    <Grid Padding="{StaticResource PagePadding}" RowDefinitions="*,Auto,*">
+        <VerticalStackLayout Grid.Row="1" Spacing="{StaticResource SpacingM}">
             <Label Text="Sportclub"
-                   FontSize="32"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" />
+                   Style="{StaticResource HeroTitle}" />
             <Label Text="Sign in to manage your classes"
-                   FontSize="14"
+                   Style="{StaticResource Caption}"
                    HorizontalOptions="Center"
-                   Margin="0,0,0,16" />
+                   Margin="{StaticResource MarginBottomM}" />
 
             <Entry Placeholder="Email"
                    Keyboard="Email"
@@ -26,6 +24,7 @@
                    Text="{Binding Password}" />
 
             <Button Text="Sign in"
+                    Style="{StaticResource AccentButton}"
                     Command="{Binding SignInCommand}"
                     IsEnabled="{Binding IsNotBusy}" />
 
@@ -34,7 +33,7 @@
                                HorizontalOptions="Center" />
 
             <Label Text="{Binding ErrorMessage}"
-                   TextColor="Red"
+                   Style="{StaticResource ErrorText}"
                    IsVisible="{Binding HasError}"
                    HorizontalOptions="Center" />
         </VerticalStackLayout>

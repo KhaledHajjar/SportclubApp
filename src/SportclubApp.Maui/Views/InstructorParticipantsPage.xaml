@@ -11,15 +11,14 @@
         <CollectionView ItemsSource="{Binding Participants}" SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="dtos:ClassParticipantDto">
-                    <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                        <HorizontalStackLayout Spacing="4">
-                            <Label Text="{Binding FirstName}" FontSize="16" />
-                            <Label Text="{Binding LastName}" FontSize="16" />
+                    <Grid Padding="{StaticResource ListItemPadding}" ColumnDefinitions="*,Auto">
+                        <HorizontalStackLayout Spacing="{StaticResource SpacingXS}">
+                            <Label Text="{Binding FirstName}" FontSize="{StaticResource FontSizeBodyLarge}" />
+                            <Label Text="{Binding LastName}" FontSize="{StaticResource FontSizeBodyLarge}" />
                         </HorizontalStackLayout>
                         <Label Grid.Column="1"
                                Text="{Binding ReservedAtUtc, StringFormat='{0:HH\\:mm}'}"
-                               FontSize="12"
-                               TextColor="Gray"
+                               Style="{StaticResource Caption}"
                                VerticalOptions="Center" />
                     </Grid>
                 </DataTemplate>
@@ -27,9 +26,10 @@
             <CollectionView.EmptyView>
                 <ContentView>
                     <Label Text="No participants yet."
+                           Style="{StaticResource Caption}"
                            HorizontalOptions="Center"
                            VerticalOptions="Center"
-                           Padding="32" />
+                           Padding="{StaticResource SpacingXL}" />
                 </ContentView>
             </CollectionView.EmptyView>
         </CollectionView>

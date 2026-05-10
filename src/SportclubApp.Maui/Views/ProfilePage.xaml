@@ -9,11 +9,11 @@
     <RefreshView IsRefreshing="{Binding IsBusy}"
                  Command="{Binding LoadCommand}">
         <ScrollView>
-            <VerticalStackLayout Padding="24" Spacing="16">
+            <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpacingM}">
 
                 <Grid HorizontalOptions="Center" WidthRequest="120" HeightRequest="120">
                     <Border StrokeShape="RoundRectangle 60"
-                            BackgroundColor="LightGray">
+                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceElevatedLight}, Dark={StaticResource SurfaceElevatedDark}}">
                         <Label Text="{Binding InitialsFallback}"
                                FontSize="36"
                                FontAttributes="Bold"
@@ -29,19 +29,20 @@
                 </Grid>
 
                 <Button Text="Change photo"
+                        Style="{StaticResource SecondaryButton}"
                         Command="{Binding ChangePhotoCommand}"
                         IsEnabled="{Binding IsNotBusy}" />
 
-                <Label Text="Email" FontAttributes="Bold" />
+                <Label Text="Email" Style="{StaticResource FieldLabel}" />
                 <Label Text="{Binding Email}" />
 
-                <Label Text="First name" FontAttributes="Bold" />
+                <Label Text="First name" Style="{StaticResource FieldLabel}" />
                 <Entry Text="{Binding FirstName}" />
 
-                <Label Text="Last name" FontAttributes="Bold" />
+                <Label Text="Last name" Style="{StaticResource FieldLabel}" />
                 <Entry Text="{Binding LastName}" />
 
-                <Label Text="Date of birth" FontAttributes="Bold" />
+                <Label Text="Date of birth" Style="{StaticResource FieldLabel}" />
                 <Grid ColumnDefinitions="*,Auto">
                     <DatePicker Date="{Binding DateOfBirth}"
                                 IsEnabled="{Binding HasDateOfBirth}" />
@@ -54,24 +55,23 @@
                         IsEnabled="{Binding IsNotBusy}" />
 
                 <Label Text="{Binding ErrorMessage}"
-                       TextColor="Red"
+                       Style="{StaticResource ErrorText}"
                        IsVisible="{Binding HasError}" />
 
-                <BoxView HeightRequest="1" Color="LightGray" Margin="0,16" />
+                <BoxView Style="{StaticResource Divider}" Margin="{StaticResource MarginVerticalM}" />
 
-                <Label Text="Subscription"
-                       FontSize="20"
-                       FontAttributes="Bold" />
+                <Label Text="Subscription" Style="{StaticResource SectionTitle}" />
 
-                <VerticalStackLayout IsVisible="{Binding HasSubscription}" Spacing="6">
-                    <Label Text="{Binding SubscriptionTypeText}" FontSize="16" />
+                <VerticalStackLayout IsVisible="{Binding HasSubscription}" Spacing="{StaticResource SpacingXS}">
+                    <Label Text="{Binding SubscriptionTypeText}" FontSize="{StaticResource FontSizeBodyLarge}" />
                     <Label Text="{Binding SubscriptionEndsText}" />
                     <Label Text="{Binding RemainingVisitsText}"
                            IsVisible="{Binding HasRemainingVisits}"
-                           TextColor="DarkGreen" />
+                           Style="{StaticResource SuccessText}" />
                 </VerticalStackLayout>
 
                 <Label Text="No active subscription."
+                       Style="{StaticResource Caption}"
                        IsVisible="{Binding HasSubscription, Converter={StaticResource InvertedBoolConverter}, FallbackValue=true}" />
 
             </VerticalStackLayout>

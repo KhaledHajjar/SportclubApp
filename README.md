@@ -100,6 +100,7 @@ On the iOS simulator the API base URL `https://localhost:5001` resolves to the h
 - **MAUI**: MVVM throughout. Pages and view models are constructor-injected via DI; no service-locator or static singletons except `UserContext.Current` and `NotificationContext.Current` which are observable singletons used as XAML binding sources.
 - **Auth**: JWT access tokens (15 min) + rotated single-use refresh tokens. The MAUI `AuthDelegatingHandler` attaches the bearer header, refreshes silently on 401, and retries the original request once with the new token.
 - **Photos**: profile photos stored under `wwwroot/uploads/{memberId}.{jpg|png}` and served by `UseStaticFiles`.
+- **Design tokens**: centralised in `src/SportclubApp.Maui/Resources/Styles/`. `Colors.xaml` defines the semantic palette (`Brand`, `Accent`, `Surface`, `Border`, `TextPrimary/Secondary`, `Success/Warning/Danger/Info`) with paired `*Light` and `*Dark` values. `Styles.xaml` wires `AppThemeBinding` between them and exposes implicit styles (`ContentPage`, `Label`, `Entry`, `Button`, `Border`) plus named styles (`PrimaryButton`, `AccentButton`, `SecondaryButton`, `DangerButton`, `LinkButton`, `Card`, `ErrorBanner`, `WarningBanner`, `InfoBanner`, `PageTitle`, `SectionTitle`, `Caption`, `FieldLabel`, `ErrorText`, `SuccessText`, `Divider`) and spacing/radius constants (`SpacingXS/S/M/L/XL`, `RadiusS/M/L`, `PagePadding`, `CardPadding`, `ListItemPadding`). Pages reference these via `Style="{StaticResource ...}"` — no inline colors or font sizes.
 
 ### Patterns used (for the design document)
 

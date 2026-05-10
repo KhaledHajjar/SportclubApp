@@ -8,58 +8,56 @@
 
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
         <ScrollView>
-            <VerticalStackLayout Padding="24" Spacing="12">
+            <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpacingM}">
 
                 <Label Text="{Binding ErrorMessage}"
-                       TextColor="Red"
+                       Style="{StaticResource ErrorText}"
                        IsVisible="{Binding HasError}" />
 
-                <VerticalStackLayout IsVisible="{Binding HasSession}" Spacing="12">
-                    <Label Text="{Binding WorkoutName}"
-                           FontSize="28"
-                           FontAttributes="Bold" />
+                <VerticalStackLayout IsVisible="{Binding HasSession}" Spacing="{StaticResource SpacingM}">
+                    <Label Text="{Binding WorkoutName}" Style="{StaticResource PageTitle}" />
 
-                    <Label Text="{Binding StartText}" FontSize="16" />
+                    <Label Text="{Binding StartText}" FontSize="{StaticResource FontSizeBodyLarge}" />
 
-                    <Label Text="Instructor" FontAttributes="Bold" Margin="0,12,0,0" />
+                    <Label Text="Instructor" Style="{StaticResource FieldLabel}" Margin="{StaticResource MarginTopM}" />
                     <Label Text="{Binding InstructorName}" />
 
-                    <Label Text="Location" FontAttributes="Bold" />
+                    <Label Text="Location" Style="{StaticResource FieldLabel}" />
                     <Label Text="{Binding LocationName}" />
 
-                    <Label Text="Description" FontAttributes="Bold" />
+                    <Label Text="Description" Style="{StaticResource FieldLabel}" />
                     <Label Text="{Binding WorkoutDescription}" />
 
-                    <BoxView HeightRequest="1" Color="LightGray" Margin="0,12" />
+                    <BoxView Style="{StaticResource Divider}" Margin="{StaticResource MarginVerticalM}" />
 
-                    <Label Text="{Binding CapacityText}" FontSize="14" />
+                    <Label Text="{Binding CapacityText}" />
                     <Label Text="{Binding StatusText}"
-                           FontSize="16"
-                           FontAttributes="Bold" />
+                           Style="{StaticResource ListItemTitle}" />
 
                     <Button Text="Reserve"
+                            Style="{StaticResource AccentButton}"
                             Command="{Binding ReserveCommand}"
-                            Margin="0,16,0,0" />
+                            Margin="{StaticResource MarginTopM}" />
 
                     <Button Text="Join waiting list"
+                            Style="{StaticResource SecondaryButton}"
                             Command="{Binding JoinWaitingListCommand}"
-                            IsVisible="{Binding CanJoinWaitingList}"
-                            Margin="0,4,0,0" />
+                            IsVisible="{Binding CanJoinWaitingList}" />
 
                     <Button Text="Leave waiting list"
+                            Style="{StaticResource SecondaryButton}"
                             Command="{Binding LeaveWaitingListCommand}"
-                            IsVisible="{Binding IsOnWaitingList}"
-                            Margin="0,4,0,0" />
+                            IsVisible="{Binding IsOnWaitingList}" />
 
                     <Label Text="You already have a reservation for this class."
+                           Style="{StaticResource SuccessText}"
                            IsVisible="{Binding HasActiveReservation}"
-                           HorizontalOptions="Center"
-                           TextColor="DarkGreen" />
+                           HorizontalOptions="Center" />
 
                     <Label Text="You're on the waiting list — we'll notify you if a spot opens."
+                           Style="{StaticResource InfoText}"
                            IsVisible="{Binding IsOnWaitingList}"
-                           HorizontalOptions="Center"
-                           TextColor="DarkBlue" />
+                           HorizontalOptions="Center" />
                 </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>
