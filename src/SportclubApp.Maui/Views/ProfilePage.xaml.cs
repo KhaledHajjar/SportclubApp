@@ -5,7 +5,6 @@ namespace SportclubApp.Maui.Views;
 public partial class ProfilePage : ContentPage
 {
     private readonly ProfileViewModel _viewModel;
-    private bool _loaded;
 
     public ProfilePage(ProfileViewModel viewModel)
     {
@@ -17,10 +16,6 @@ public partial class ProfilePage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        if (!_loaded)
-        {
-            _loaded = true;
-            _viewModel.LoadCommand.Execute(null);
-        }
+        _viewModel.LoadCommand.Execute(null);
     }
 }

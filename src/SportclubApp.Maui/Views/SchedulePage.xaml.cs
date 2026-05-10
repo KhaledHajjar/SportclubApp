@@ -16,9 +16,6 @@ public partial class SchedulePage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        if (_viewModel.Groups.Count == 0)
-        {
-            await _viewModel.LoadAsync();
-        }
+        await _viewModel.LoadAsync();
     }
 }
