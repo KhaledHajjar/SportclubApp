@@ -1,8 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SportclubApp.Maui.Services;
 using SportclubApp.Maui.Services.Api;
+using SportclubApp.Maui.Services.Auth;
 using SportclubApp.Maui.Services.Media;
 using SportclubApp.Maui.Services.Navigation;
+using SportclubApp.Maui.Services.Notifications;
+using SportclubApp.Shared.Auth;
 using SportclubApp.Shared.Dtos;
 using SportclubApp.Shared.Enums;
 
@@ -11,18 +15,23 @@ namespace SportclubApp.Maui.ViewModels;
 public sealed partial class ProfileViewModel(
     ISportclubApi api,
     IMediaPickerService mediaPicker,
-    INavigationService navigation) : BaseViewModel
+    INavigationService navigation,
+    ISecureTokenStore tokenStore,
+    ISubscriptionExpiryScheduler expiryScheduler) : BaseViewModel
 {
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(InitialsFallback))]
     private string _firstName = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(InitialsFallback))]
     private string _lastName = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasPhoto))]
-    [NotifyPropertyChangedFor(nameof(InitialsFallback))]
-    private string? _profilePhotoUrl;
+    private bool _hasPhoto;
+
+    [ObservableProperty]
+    private ImageSource? _profilePhoto;
 
     [ObservableProperty]
     private DateTime _dateOfBirth = DateTime.UtcNow.AddYears(-25);
@@ -40,8 +49,6 @@ public sealed partial class ProfileViewModel(
     [NotifyPropertyChangedFor(nameof(RemainingVisitsText))]
     [NotifyPropertyChangedFor(nameof(HasRemainingVisits))]
     private SubscriptionDto? _subscription;
-
-    public bool HasPhoto => !string.IsNullOrWhiteSpace(ProfilePhotoUrl);
 
     public string InitialsFallback => string.Concat(
         FirstName.Length > 0 ? FirstName[0].ToString() : string.Empty,
@@ -84,7 +91,7 @@ public sealed partial class ProfileViewModel(
             var subTask = api.GetMySubscriptionAsync();
             await Task.WhenAll(meTask, subTask);
 
-            ApplyMember(await meTask);
+            await ApplyMemberAsync(await meTask);
             Subscription = await subTask;
         }
         catch (Exception)
@@ -112,7 +119,7 @@ public sealed partial class ProfileViewModel(
         {
             DateOnly? dob = HasDateOfBirth ? DateOnly.FromDateTime(DateOfBirth) : null;
             var updated = await api.UpdateMeAsync(new UpdateMemberRequest(FirstName.Trim(), LastName.Trim(), dob));
-            ApplyMember(updated);
+            await ApplyMemberAsync(updated);
             await navigation.DisplayAlertAsync("Profile saved", "Your changes have been saved.");
         }
         catch (Exception)
@@ -146,7 +153,7 @@ public sealed partial class ProfileViewModel(
         try
         {
             var updated = await api.UploadProfilePhotoAsync(pick.Content, pick.FileName, pick.ContentType);
-            ApplyMember(updated);
+            await ApplyMemberAsync(updated);
         }
         catch (Exception)
         {
@@ -158,7 +165,36 @@ public sealed partial class ProfileViewModel(
         }
     }
 
-    private void ApplyMember(MemberDto member)
+    [RelayCommand]
+    private async Task SignOutAsync()
+    {
+        IsBusy = true;
+        try
+        {
+            var refreshToken = await tokenStore.GetRefreshTokenAsync();
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                try
+                {
+                    await api.LogoutAsync(new LogoutRequest(refreshToken));
+                }
+                catch
+                {
+                    // Ignore network errors on logout — clear local tokens regardless.
+                }
+            }
+        }
+        finally
+        {
+            await tokenStore.ClearAsync();
+            UserContext.Current.Clear();
+            await expiryScheduler.CancelAsync();
+            IsBusy = false;
+            await navigation.GoToAsync("//login");
+        }
+    }
+
+    private async Task ApplyMemberAsync(MemberDto member)
     {
         FirstName = member.FirstName;
         LastName = member.LastName;
@@ -168,8 +204,33 @@ public sealed partial class ProfileViewModel(
         {
             DateOfBirth = dob.ToDateTime(TimeOnly.MinValue);
         }
-        ProfilePhotoUrl = string.IsNullOrWhiteSpace(member.ProfilePhotoUrl)
-            ? null
-            : new Uri(new Uri(AppConstants.ApiBaseUrl), member.ProfilePhotoUrl).ToString();
+
+        HasPhoto = member.HasPhoto;
+        if (!member.HasPhoto)
+        {
+            ProfilePhoto = null;
+            return;
+        }
+
+        try
+        {
+            await using var stream = await api.GetMyPhotoAsync();
+            if (stream is null)
+            {
+                HasPhoto = false;
+                ProfilePhoto = null;
+                return;
+            }
+
+            using var memory = new MemoryStream();
+            await stream.CopyToAsync(memory);
+            var bytes = memory.ToArray();
+            ProfilePhoto = ImageSource.FromStream(() => new MemoryStream(bytes));
+        }
+        catch
+        {
+            HasPhoto = false;
+            ProfilePhoto = null;
+        }
     }
 }

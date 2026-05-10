@@ -23,7 +23,7 @@
                     </Border>
                     <Border StrokeShape="RoundRectangle 60"
                             IsVisible="{Binding HasPhoto}">
-                        <Image Source="{Binding ProfilePhotoUrl}"
+                        <Image Source="{Binding ProfilePhoto}"
                                Aspect="AspectFill" />
                     </Border>
                 </Grid>
@@ -73,6 +73,13 @@
                 <Label Text="No active subscription."
                        Style="{StaticResource Caption}"
                        IsVisible="{Binding HasSubscription, Converter={StaticResource InvertedBoolConverter}, FallbackValue=true}" />
+
+                <BoxView Style="{StaticResource Divider}" Margin="{StaticResource MarginVerticalM}" />
+
+                <Button Text="Sign out"
+                        Style="{StaticResource SecondaryButton}"
+                        Command="{Binding SignOutCommand}"
+                        IsEnabled="{Binding IsNotBusy}" />
 
             </VerticalStackLayout>
         </ScrollView>
