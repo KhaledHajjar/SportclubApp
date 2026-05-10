@@ -6,4 +6,4 @@ public sealed record MemberDto(
     string FirstName,
     string LastName,
     DateOnly? DateOfBirth,
-    string? ProfilePhotoUrl);
+    bool HasPhoto);

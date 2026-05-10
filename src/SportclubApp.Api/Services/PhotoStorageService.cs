@@ -14,6 +14,12 @@ public sealed class PhotoStorageService(IWebHostEnvironment env) : IPhotoStorage
         ["image/png"] = ".png",
     };
 
+    private static readonly (string Extension, string ContentType)[] LookupOrder =
+    {
+        (".jpg", "image/jpeg"),
+        (".png", "image/png"),
+    };
+
     public async Task<string> SaveProfilePhotoAsync(Guid memberId, IFormFile file, CancellationToken ct)
     {
         if (file.Length == 0)
@@ -46,5 +52,22 @@ public sealed class PhotoStorageService(IWebHostEnvironment env) : IPhotoStorage
         await file.CopyToAsync(stream, ct);
 
         return $"/{UploadsFolder}/{fileName}";
+    }
+
+    public Task<PhotoFile?> OpenProfilePhotoAsync(Guid memberId, CancellationToken ct)
+    {
+        var uploadsRoot = Path.Combine(env.WebRootPath, UploadsFolder);
+
+        foreach (var (extension, contentType) in LookupOrder)
+        {
+            var path = Path.Combine(uploadsRoot, $"{memberId}{extension}");
+            if (File.Exists(path))
+            {
+                Stream stream = File.OpenRead(path);
+                return Task.FromResult<PhotoFile?>(new PhotoFile(stream, contentType));
+            }
+        }
+
+        return Task.FromResult<PhotoFile?>(null);
     }
 }

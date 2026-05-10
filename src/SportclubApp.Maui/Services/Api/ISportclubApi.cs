@@ -19,6 +19,8 @@ public interface ISportclubApi
 
     Task<MemberDto> UploadProfilePhotoAsync(Stream content, string fileName, string contentType, CancellationToken ct = default);
 
+    Task<Stream?> GetMyPhotoAsync(CancellationToken ct = default);
+
     Task<SubscriptionDto?> GetMySubscriptionAsync(CancellationToken ct = default);
 
     Task<IReadOnlyList<ClassSessionDto>> GetScheduleAsync(DateTimeOffset from, DateTimeOffset to, CancellationToken ct = default);

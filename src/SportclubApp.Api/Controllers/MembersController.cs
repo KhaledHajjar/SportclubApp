@@ -92,6 +92,16 @@ public sealed class MembersController(
         return Ok(ToDto(member.Id, member.Email!, member.FirstName, member.LastName, member.DateOfBirth, member.ProfilePhotoPath));
     }
 
+    [HttpGet("me/photo")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetMyPhoto(CancellationToken ct)
+    {
+        var memberId = User.GetMemberId();
+        var photo = await photoStorage.OpenProfilePhotoAsync(memberId, ct);
+        return photo is null ? NotFound() : File(photo.Stream, photo.ContentType);
+    }
+
     private static MemberDto ToDto(Guid id, string email, string firstName, string lastName, DateOnly? dob, string? photoPath)
-        => new(id, email, firstName, lastName, dob, photoPath);
+        => new(id, email, firstName, lastName, dob, !string.IsNullOrWhiteSpace(photoPath));
 }

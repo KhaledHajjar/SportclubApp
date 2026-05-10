@@ -47,6 +47,18 @@ public sealed class SportclubApi(HttpClient http) : ISportclubApi
             ?? throw new InvalidOperationException("Empty response body from POST /members/me/photo.");
     }
 
+    public async Task<Stream?> GetMyPhotoAsync(CancellationToken ct = default)
+    {
+        using var response = await http.GetAsync("api/v1/members/me/photo", ct);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+        await EnsureSuccessAsync(response, ct);
+        var bytes = await response.Content.ReadAsByteArrayAsync(ct);
+        return new MemoryStream(bytes);
+    }
+
     public async Task<SubscriptionDto?> GetMySubscriptionAsync(CancellationToken ct = default)
     {
         using var response = await http.GetAsync("api/v1/subscriptions/me", ct);
