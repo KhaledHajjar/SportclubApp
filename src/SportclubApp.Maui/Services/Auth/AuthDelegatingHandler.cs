@@ -13,6 +13,9 @@ public sealed class AuthDelegatingHandler(ISecureTokenStore store) : DelegatingH
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        // PoC limitation: concurrent 401s both call TryRefreshAsync; the second
+        // sees a single-use token already consumed and the user gets signed out.
+        // Production fix: SemaphoreSlim(1, 1) around the refresh. See README.
         if (IsAnonymous(request))
         {
             return await base.SendAsync(request, cancellationToken);

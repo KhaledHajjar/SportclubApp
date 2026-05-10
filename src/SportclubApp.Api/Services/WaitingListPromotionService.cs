@@ -13,6 +13,9 @@ public sealed class WaitingListPromotionService(
 {
     public async Task<bool> TryPromoteHeadAsync(Guid classSessionId, CancellationToken ct)
     {
+        // Intentional: promotion bypasses the weekly-visit and subscription policy
+        // checks. By joining the waitlist a member opted in to a visit that may
+        // exceed their weekly limit. Treat any "fix" here as a product decision.
         var session = await db.ClassSessions.SingleOrDefaultAsync(c => c.Id == classSessionId, ct);
         if (session is null)
         {

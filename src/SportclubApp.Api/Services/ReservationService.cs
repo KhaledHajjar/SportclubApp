@@ -20,6 +20,10 @@ public sealed class ReservationService(
 
     public async Task<ReservationResult> ReserveAsync(Guid memberId, Guid classSessionId, CancellationToken ct)
     {
+        // PoC limitation: capacity, duplicate-reservation, and weekly-limit checks
+        // are not transactional. Tolerated under single-writer SQLite; production
+        // needs a unique filtered active-reservation index plus a RowVersion on
+        // ClassSession for atomic capacity CAS. See README "Limitations".
         var now = time.GetUtcNow();
 
         var session = await db.ClassSessions.SingleOrDefaultAsync(c => c.Id == classSessionId, ct);

@@ -120,6 +120,25 @@ On the iOS simulator the API base URL `https://localhost:5001` resolves to the h
 - Multi-tenant / multi-club support
 - Blazor admin web app
 
+## Limitations and future work
+
+The following are known limitations of the PoC. They're tolerated for the scope of this build and should be carried over to the design document's architecture section when it's written.
+
+### Reservation race condition
+
+`ReservationService.ReserveAsync` does check-then-act on capacity, duplicate reservations, and the weekly-visit limit without a surrounding transaction. Two concurrent requests can both pass the same gate and both insert. SQLite's single-writer model masks this in the PoC. Production needs:
+
+- A unique filtered index `(MemberId, ClassSessionId)` where `Status = Active` to make a second active reservation a DB-level violation.
+- A `RowVersion` token on `ClassSession` so capacity checks become an atomic compare-and-swap.
+
+### Token-refresh race in the MAUI client
+
+`AuthDelegatingHandler` has no mutex around the refresh path. If two requests hit 401 simultaneously, both call `/auth/refresh`; refresh tokens are single-use, so the second call fails, the handler clears the secure store, and the user is silently signed out mid-session. Production fix: a `SemaphoreSlim(1, 1)` so only one refresh runs and waiters re-read the freshly saved token.
+
+### Waitlist promotion bypasses reservation rules
+
+`WaitingListPromotionService.TryPromoteHeadAsync` writes a `Reservation` directly without consulting `ISubscriptionLimitPolicy`, the active-subscription check, or the 7-day window. This is **intentional**: by joining the waitlist a member explicitly opts in to a visit that may exceed their weekly limit. Anyone tempted to "fix" this should treat it as a product decision, not a bug.
+
 ## Definition of Done — per user story
 
 For each story to count as done:
