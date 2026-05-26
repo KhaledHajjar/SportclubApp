@@ -11,7 +11,14 @@
         <Border Grid.Row="0"
                 Style="{StaticResource WarningBanner}"
                 IsVisible="{Binding HasError}">
-            <Label Text="{Binding ErrorMessage}" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpacingM}">
+                <Label Text="{Binding ErrorMessage}" VerticalOptions="Center" />
+                <Button Grid.Column="1"
+                        Text="Retry"
+                        Style="{StaticResource SecondaryButton}"
+                        Command="{Binding LoadCommand}"
+                        IsEnabled="{Binding IsNotBusy}" />
+            </Grid>
         </Border>
 
         <RefreshView Grid.Row="1"

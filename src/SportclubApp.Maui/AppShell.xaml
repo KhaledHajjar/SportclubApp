@@ -5,7 +5,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:SportclubApp.Maui.Views"
     xmlns:services="clr-namespace:SportclubApp.Maui.Services"
-    xmlns:notifications="clr-namespace:SportclubApp.Maui.Services.Notifications"
     Title="Sportclub"
     FlyoutBehavior="Disabled">
 
@@ -29,7 +28,8 @@
             Route="history"
             ContentTemplate="{DataTemplate views:HistoryPage}" />
         <ShellContent
-            Title="{Binding Title, Source={x:Static notifications:NotificationContext.Current}}"
+            x:Name="NotificationsTab"
+            Title="Notifications"
             Route="notifications"
             ContentTemplate="{DataTemplate views:NotificationsPage}" />
         <ShellContent

@@ -79,7 +79,11 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
             b.Property(r => r.Status).HasConversion<int>();
             b.HasOne(r => r.Member).WithMany(m => m.Reservations).HasForeignKey(r => r.MemberId).OnDelete(DeleteBehavior.Cascade);
             b.HasOne(r => r.ClassSession).WithMany(c => c.Reservations).HasForeignKey(r => r.ClassSessionId).OnDelete(DeleteBehavior.Cascade);
-            b.HasIndex(r => new { r.MemberId, r.ClassSessionId, r.Status });
+            // Filter literal "Status" = 0 matches ReservationStatus.Active under HasConversion<int>().
+            b.HasIndex(r => new { r.MemberId, r.ClassSessionId })
+                .HasDatabaseName("IX_Reservations_Member_ClassSession_ActiveUnique")
+                .IsUnique()
+                .HasFilter("\"Status\" = 0");
         });
 
         builder.Entity<WaitingListEntry>(b =>

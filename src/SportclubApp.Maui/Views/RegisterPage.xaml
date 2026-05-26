@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SportclubApp.Maui.ViewModels"
+             x:Class="SportclubApp.Maui.Views.RegisterPage"
+             x:DataType="vm:RegisterViewModel"
+             Title="{Binding Title}"
+             Shell.NavBarIsVisible="True">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="{StaticResource PagePadding}"
+                             Spacing="{StaticResource SpacingM}">
+            <Label Text="Join Sportclub"
+                   Style="{StaticResource HeroTitle}" />
+            <Label Text="Create your account to manage your classes"
+                   Style="{StaticResource Caption}"
+                   HorizontalOptions="Center"
+                   Margin="{StaticResource MarginBottomM}" />
+
+            <Label Text="First name" Style="{StaticResource FieldLabel}" />
+            <Entry Placeholder="Alice"
+                   Text="{Binding FirstName}" />
+
+            <Label Text="Last name" Style="{StaticResource FieldLabel}" />
+            <Entry Placeholder="de Vries"
+                   Text="{Binding LastName}" />
+
+            <Label Text="Email" Style="{StaticResource FieldLabel}" />
+            <Entry Placeholder="you@example.com"
+                   Keyboard="Email"
+                   Text="{Binding Email}" />
+
+            <Label Text="Password" Style="{StaticResource FieldLabel}" />
+            <Entry Placeholder="At least 8 characters"
+                   IsPassword="True"
+                   Text="{Binding Password}" />
+
+            <Button Text="Create account"
+                    Style="{StaticResource AccentButton}"
+                    Command="{Binding SignUpCommand}"
+                    IsEnabled="{Binding IsNotBusy}"
+                    Margin="{StaticResource MarginTopM}" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               IsVisible="{Binding IsBusy}"
+                               HorizontalOptions="Center" />
+
+            <Label Text="{Binding ErrorMessage}"
+                   Style="{StaticResource ErrorText}"
+                   IsVisible="{Binding HasError}"
+                   HorizontalOptions="Center" />
+
+            <Button Text="Already have an account? Sign in"
+                    Style="{StaticResource LinkButton}"
+                    Command="{Binding BackToSignInCommand}"
+                    HorizontalOptions="Center" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -36,6 +36,12 @@
                    Style="{StaticResource ErrorText}"
                    IsVisible="{Binding HasError}"
                    HorizontalOptions="Center" />
+
+            <Button Text="Create account"
+                    Style="{StaticResource LinkButton}"
+                    Command="{Binding GoToRegisterCommand}"
+                    HorizontalOptions="Center"
+                    Margin="{StaticResource MarginTopM}" />
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

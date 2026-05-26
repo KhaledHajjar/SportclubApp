@@ -20,13 +20,16 @@ public sealed class ReservationService(
 
     public async Task<ReservationResult> ReserveAsync(Guid memberId, Guid classSessionId, CancellationToken ct)
     {
-        // PoC limitation: capacity, duplicate-reservation, and weekly-limit checks
-        // are not transactional. Tolerated under single-writer SQLite; production
-        // needs a unique filtered active-reservation index plus a RowVersion on
-        // ClassSession for atomic capacity CAS. See README "Limitations".
+        // Duplicate active-reservation races are caught by a unique filtered index
+        // (see AppDbContext). Capacity-overrun under concurrent writes still needs
+        // a RowVersion on ClassSession for an atomic compare-and-swap — see README
+        // "Limitations".
         var now = time.GetUtcNow();
 
-        var session = await db.ClassSessions.SingleOrDefaultAsync(c => c.Id == classSessionId, ct);
+        var session = await db.ClassSessions
+            .Include(c => c.Workout)
+            .Include(c => c.Location)
+            .SingleOrDefaultAsync(c => c.Id == classSessionId, ct);
         if (session is null)
         {
             return ReservationResult.Fail(ReservationErrorTypes.ClassNotFound, "Class not found.");
@@ -87,14 +90,28 @@ public sealed class ReservationService(
             Status = ReservationStatus.Active,
         };
         db.Reservations.Add(reservation);
-        await db.SaveChangesAsync(ct);
+
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException)
+        {
+            // Concurrent request created an active reservation for the same
+            // (member, class) pair — caught by the unique filtered index.
+            return ReservationResult.Fail(
+                ReservationErrorTypes.AlreadyReserved,
+                "You already have a reservation for this class.");
+        }
 
         return ReservationResult.Ok(new ReservationDto(
             Id: reservation.Id,
             ClassSessionId: classSessionId,
             ClassStartUtc: session.StartUtc,
             CreatedUtc: reservation.CreatedUtc,
-            Status: reservation.Status));
+            Status: reservation.Status,
+            WorkoutName: session.Workout.Name,
+            LocationName: session.Location.Name));
     }
 
     public async Task<ReservationResult> CancelAsync(Guid memberId, Guid reservationId, CancellationToken ct)
@@ -102,7 +119,8 @@ public sealed class ReservationService(
         var now = time.GetUtcNow();
 
         var reservation = await db.Reservations
-            .Include(r => r.ClassSession)
+            .Include(r => r.ClassSession).ThenInclude(c => c.Workout)
+            .Include(r => r.ClassSession).ThenInclude(c => c.Location)
             .SingleOrDefaultAsync(r => r.Id == reservationId, ct);
 
         if (reservation is null)
@@ -135,7 +153,9 @@ public sealed class ReservationService(
             ClassSessionId: reservation.ClassSessionId,
             ClassStartUtc: reservation.ClassSession.StartUtc,
             CreatedUtc: reservation.CreatedUtc,
-            Status: reservation.Status));
+            Status: reservation.Status,
+            WorkoutName: reservation.ClassSession.Workout.Name,
+            LocationName: reservation.ClassSession.Location.Name));
     }
 
     public async Task<IReadOnlyList<ReservationDto>> GetMineAsync(Guid memberId, CancellationToken ct)
@@ -149,7 +169,9 @@ public sealed class ReservationService(
                 r.ClassSessionId,
                 r.ClassSession.StartUtc,
                 r.CreatedUtc,
-                r.Status))
+                r.Status,
+                r.ClassSession.Workout.Name,
+                r.ClassSession.Location.Name))
             .ToListAsync(ct);
     }
 }

@@ -10,7 +10,7 @@ using SportclubApp.Shared.Auth;
 
 namespace SportclubApp.Maui.ViewModels;
 
-public sealed partial class LoginViewModel(
+public sealed partial class RegisterViewModel(
     ISportclubApi api,
     ISecureTokenStore tokenStore,
     INavigationService navigation,
@@ -18,50 +18,38 @@ public sealed partial class LoginViewModel(
     INotificationsBadgeService badge) : BaseViewModel
 {
     [ObservableProperty]
+    private string _firstName = string.Empty;
+
+    [ObservableProperty]
+    private string _lastName = string.Empty;
+
+    [ObservableProperty]
     private string _email = string.Empty;
 
     [ObservableProperty]
     private string _password = string.Empty;
 
-    public LoginViewModel ConfigureTitle()
+    public RegisterViewModel ConfigureTitle()
     {
-        Title = "Sign in";
+        Title = "Create account";
         return this;
     }
 
-    public async Task TryAutoLoginAsync()
+    [RelayCommand]
+    private async Task SignUpAsync()
     {
-        var refreshToken = await tokenStore.GetRefreshTokenAsync();
-        if (string.IsNullOrEmpty(refreshToken))
+        if (string.IsNullOrWhiteSpace(FirstName)
+            || string.IsNullOrWhiteSpace(LastName)
+            || string.IsNullOrWhiteSpace(Email)
+            || string.IsNullOrWhiteSpace(Password))
         {
+            ErrorMessage = "All fields are required.";
             return;
         }
 
-        try
+        if (Password.Length < 8)
         {
-            var response = await api.RefreshAsync(new RefreshRequest(refreshToken));
-            await tokenStore.SaveTokensAsync(response.AccessToken, response.RefreshToken);
-            UserContext.Current.Apply(response);
-            await ScheduleSubscriptionExpiryAsync();
-            await badge.RefreshAsync();
-            await navigation.GoToAsync("//main");
-        }
-        catch
-        {
-            await tokenStore.ClearAsync();
-            UserContext.Current.Clear();
-        }
-    }
-
-    [RelayCommand]
-    private Task GoToRegisterAsync() => navigation.GoToAsync("register");
-
-    [RelayCommand]
-    private async Task SignInAsync()
-    {
-        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
-        {
-            ErrorMessage = "Email and password are required.";
+            ErrorMessage = "Password must be at least 8 characters.";
             return;
         }
 
@@ -70,21 +58,27 @@ public sealed partial class LoginViewModel(
 
         try
         {
-            var response = await api.LoginAsync(new LoginRequest(Email.Trim(), Password));
+            var response = await api.RegisterAsync(new RegisterRequest(
+                Email: Email.Trim(),
+                Password: Password,
+                FirstName: FirstName.Trim(),
+                LastName: LastName.Trim()));
+
             await tokenStore.SaveTokensAsync(response.AccessToken, response.RefreshToken);
             UserContext.Current.Apply(response);
             Password = string.Empty;
+
             await ScheduleSubscriptionExpiryAsync();
             await badge.RefreshAsync();
             await navigation.GoToAsync("//main");
         }
-        catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+        catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
         {
-            ErrorMessage = "Invalid email or password.";
+            ErrorMessage = "An account with this email already exists.";
         }
         catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
         {
-            ErrorMessage = "Email and password are required.";
+            ErrorMessage = ex.Detail ?? "Some fields are invalid. Please check and try again.";
         }
         catch (Exception)
         {
@@ -96,6 +90,9 @@ public sealed partial class LoginViewModel(
         }
     }
 
+    [RelayCommand]
+    private Task BackToSignInAsync() => navigation.GoBackAsync();
+
     private async Task ScheduleSubscriptionExpiryAsync()
     {
         try
@@ -105,7 +102,7 @@ public sealed partial class LoginViewModel(
         }
         catch
         {
-            // Best-effort — never block login on local-notification scheduling.
+            // Best-effort — never block sign-up on local-notification scheduling.
         }
     }
 }

@@ -11,11 +11,10 @@ public sealed class AuthDelegatingHandler(ISecureTokenStore store) : DelegatingH
     private const string LoginPath = "/api/v1/auth/login";
     private const string RegisterPath = "/api/v1/auth/register";
 
+    private readonly SemaphoreSlim _refreshGate = new(1, 1);
+
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        // PoC limitation: concurrent 401s both call TryRefreshAsync; the second
-        // sees a single-use token already consumed and the user gets signed out.
-        // Production fix: SemaphoreSlim(1, 1) around the refresh. See README.
         if (IsAnonymous(request))
         {
             return await base.SendAsync(request, cancellationToken);
@@ -38,7 +37,7 @@ public sealed class AuthDelegatingHandler(ISecureTokenStore store) : DelegatingH
             return response;
         }
 
-        if (!await TryRefreshAsync(request.RequestUri!, cancellationToken))
+        if (!await TryRefreshAsync(token, request.RequestUri!, cancellationToken))
         {
             return response;
         }
@@ -62,36 +61,53 @@ public sealed class AuthDelegatingHandler(ISecureTokenStore store) : DelegatingH
             || path.EndsWith(RefreshPath, StringComparison.OrdinalIgnoreCase));
     }
 
-    private async Task<bool> TryRefreshAsync(Uri originalUri, CancellationToken ct)
+    private async Task<bool> TryRefreshAsync(string? usedAccessToken, Uri originalUri, CancellationToken ct)
     {
-        var refreshToken = await store.GetRefreshTokenAsync();
-        if (string.IsNullOrEmpty(refreshToken))
+        await _refreshGate.WaitAsync(ct);
+        try
         {
-            return false;
+            // Another request already refreshed while we were waiting on the gate.
+            // Skip a second redemption of the now-revoked refresh token.
+            var current = await store.GetAccessTokenAsync();
+            if (!string.IsNullOrEmpty(current)
+                && !string.Equals(current, usedAccessToken, StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            var refreshToken = await store.GetRefreshTokenAsync();
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return false;
+            }
+
+            var refreshUri = new Uri(originalUri, RefreshPath);
+            using var refreshRequest = new HttpRequestMessage(HttpMethod.Post, refreshUri)
+            {
+                Content = JsonContent.Create(new RefreshRequest(refreshToken)),
+            };
+
+            using var refreshResponse = await base.SendAsync(refreshRequest, ct);
+            if (!refreshResponse.IsSuccessStatusCode)
+            {
+                await store.ClearAsync();
+                return false;
+            }
+
+            var payload = await refreshResponse.Content.ReadFromJsonAsync<AuthResponse>(ct);
+            if (payload is null)
+            {
+                await store.ClearAsync();
+                return false;
+            }
+
+            await store.SaveTokensAsync(payload.AccessToken, payload.RefreshToken);
+            return true;
         }
-
-        var refreshUri = new Uri(originalUri, RefreshPath);
-        using var refreshRequest = new HttpRequestMessage(HttpMethod.Post, refreshUri)
+        finally
         {
-            Content = JsonContent.Create(new RefreshRequest(refreshToken)),
-        };
-
-        using var refreshResponse = await base.SendAsync(refreshRequest, ct);
-        if (!refreshResponse.IsSuccessStatusCode)
-        {
-            await store.ClearAsync();
-            return false;
+            _refreshGate.Release();
         }
-
-        var payload = await refreshResponse.Content.ReadFromJsonAsync<AuthResponse>(ct);
-        if (payload is null)
-        {
-            await store.ClearAsync();
-            return false;
-        }
-
-        await store.SaveTokensAsync(payload.AccessToken, payload.RefreshToken);
-        return true;
     }
 
     private static async Task<HttpRequestMessage> CloneRequestAsync(HttpRequestMessage source, CancellationToken ct)

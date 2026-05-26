@@ -94,8 +94,13 @@ public sealed class ReservationItemViewModel(ReservationDto dto)
     public Guid ClassSessionId { get; } = dto.ClassSessionId;
     public DateTimeOffset ClassStartUtc { get; } = dto.ClassStartUtc;
     public ReservationStatus Status { get; } = dto.Status;
+    public string WorkoutName { get; } = dto.WorkoutName;
+    public string LocationName { get; } = dto.LocationName;
 
     public string StartText => ClassStartUtc.LocalDateTime.ToString("dddd, MMM d • HH:mm");
+
+    public string LocationLine =>
+        string.IsNullOrWhiteSpace(LocationName) ? StartText : $"{StartText} • {LocationName}";
 
     public string StatusText => Status switch
     {

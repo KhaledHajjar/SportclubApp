@@ -39,7 +39,8 @@
                             </Grid.GestureRecognizers>
 
                             <VerticalStackLayout Spacing="2">
-                                <Label Text="{Binding StartText}" FontSize="{StaticResource FontSizeBodyLarge}" />
+                                <Label Text="{Binding WorkoutName}" Style="{StaticResource ListItemTitle}" />
+                                <Label Text="{Binding LocationLine}" Style="{StaticResource Caption}" />
                                 <Label Text="{Binding StatusText}" Style="{StaticResource Caption}" />
                             </VerticalStackLayout>
 

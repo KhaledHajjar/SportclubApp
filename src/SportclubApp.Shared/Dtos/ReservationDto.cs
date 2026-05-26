@@ -7,4 +7,6 @@ public sealed record ReservationDto(
     Guid ClassSessionId,
     DateTimeOffset ClassStartUtc,
     DateTimeOffset CreatedUtc,
-    ReservationStatus Status);
+    ReservationStatus Status,
+    string WorkoutName,
+    string LocationName);

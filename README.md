@@ -142,16 +142,9 @@ On the iOS simulator the API base URL `https://localhost:5001` resolves to the h
 
 The following are known limitations of the PoC. They're tolerated for the scope of this build and should be carried over to the design document's architecture section when it's written.
 
-### Reservation race condition
+### Reservation capacity race condition
 
-`ReservationService.ReserveAsync` does check-then-act on capacity, duplicate reservations, and the weekly-visit limit without a surrounding transaction. Two concurrent requests can both pass the same gate and both insert. SQLite's single-writer model masks this in the PoC. Production needs:
-
-- A unique filtered index `(MemberId, ClassSessionId)` where `Status = Active` to make a second active reservation a DB-level violation.
-- A `RowVersion` token on `ClassSession` so capacity checks become an atomic compare-and-swap.
-
-### Token-refresh race in the MAUI client
-
-`AuthDelegatingHandler` has no mutex around the refresh path. If two requests hit 401 simultaneously, both call `/auth/refresh`; refresh tokens are single-use, so the second call fails, the handler clears the secure store, and the user is silently signed out mid-session. Production fix: a `SemaphoreSlim(1, 1)` so only one refresh runs and waiters re-read the freshly saved token.
+`ReservationService.ReserveAsync` does check-then-act on capacity and the weekly-visit limit without a surrounding transaction. Duplicate active reservations are caught at the DB layer by a unique filtered index on `(MemberId, ClassSessionId)` where `Status = Active`, so the second insert fails and is translated to an `AlreadyReserved` ProblemDetails. Capacity overrun under concurrent writes is still possible because the count read is not atomic with the insert. Production fix: add a `RowVersion` token on `ClassSession` so capacity checks become an atomic compare-and-swap.
 
 ### Waitlist promotion bypasses reservation rules
 

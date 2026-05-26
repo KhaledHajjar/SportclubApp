@@ -25,14 +25,23 @@
             <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="dtos:NotificationDto">
-                        <Grid Padding="{StaticResource ListItemPadding}" ColumnDefinitions="*">
+                        <Grid Padding="{StaticResource ListItemPadding}"
+                              ColumnDefinitions="Auto,*"
+                              ColumnSpacing="{StaticResource SpacingM}">
                             <Grid.GestureRecognizers>
                                 <TapGestureRecognizer
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:NotificationsViewModel}}, Path=OpenCommand}"
                                     CommandParameter="{Binding}" />
                             </Grid.GestureRecognizers>
 
-                            <VerticalStackLayout Spacing="2">
+                            <BoxView WidthRequest="10"
+                                     HeightRequest="10"
+                                     CornerRadius="5"
+                                     BackgroundColor="{AppThemeBinding Light={StaticResource BrandLight}, Dark={StaticResource BrandDark}}"
+                                     VerticalOptions="Center"
+                                     IsVisible="{Binding ReadUtc, Converter={StaticResource IsNullConverter}}" />
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
                                 <Label Text="{Binding Title}" Style="{StaticResource ListItemTitle}" />
                                 <Label Text="{Binding Body}" />
                                 <Label Text="{Binding CreatedUtc, StringFormat='{0:dddd, MMM d • HH:mm}'}"
