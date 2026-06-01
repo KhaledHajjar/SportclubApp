@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/SportclubApp.Admin/SportclubApp.Admin.csproj" />
     <Project Path="src/SportclubApp.Api/SportclubApp.Api.csproj" />
     <Project Path="src/SportclubApp.Maui/SportclubApp.Maui.csproj">
       <Deploy Solution="Debug|*" />

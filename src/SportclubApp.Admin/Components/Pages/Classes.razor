@@ -1,0 +1,93 @@
+@page "/classes"
+@inject IAdminApi AdminApi
+
+<PageTitle>Sportclub Admin · Class sessions</PageTitle>
+
+<header class="page-header">
+    <p class="overline">SCHEDULE</p>
+    <h1>Class sessions</h1>
+</header>
+
+<div class="filters">
+    <label>From <input type="date" @bind="fromDate" /></label>
+    <label>To <input type="date" @bind="toDate" /></label>
+    <button class="filter-button" @onclick="LoadAsync">Refresh</button>
+</div>
+
+@if (isLoading)
+{
+    <p class="muted">Loading classes...</p>
+}
+else if (error is not null)
+{
+    <div class="error-banner">@error</div>
+}
+else if (sessions is null || sessions.Count == 0)
+{
+    <p class="muted">No classes in this range.</p>
+}
+else
+{
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Start</th>
+                <th>Workout</th>
+                <th>Instructor</th>
+                <th>Location</th>
+                <th>Capacity</th>
+                <th>Reserved</th>
+                <th>Free</th>
+                <th>Waitlist</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in sessions)
+            {
+                <tr>
+                    <td>@s.StartUtc.LocalDateTime.ToString("ddd, MMM d • HH:mm")</td>
+                    <td><span class="workout-pill workout-@s.Workout.Name.ToLowerInvariant()">@s.Workout.Name</span></td>
+                    <td>@s.Instructor.FirstName @s.Instructor.LastName</td>
+                    <td>@s.Location.Name</td>
+                    <td>@s.Capacity</td>
+                    <td>@s.ReservedCount</td>
+                    <td>@(s.IsFull ? "FULL" : s.FreeSpots.ToString())</td>
+                    <td>@s.WaitingListCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private DateTime fromDate = DateTime.Today;
+    private DateTime toDate = DateTime.Today.AddDays(7);
+    private IReadOnlyList<ClassSessionDto>? sessions;
+    private bool isLoading = true;
+    private string? error;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        isLoading = true;
+        error = null;
+        try
+        {
+            // DateTime.Today is Kind=Local, so use the constructor that infers
+            // the offset from the kind. Passing TimeSpan.Zero explicitly here
+            // would throw because zero doesn't match the local timezone offset.
+            var from = new DateTimeOffset(fromDate);
+            var to = new DateTimeOffset(toDate.AddDays(1)); // include end day
+            sessions = await AdminApi.GetClassSessionsAsync(from, to);
+        }
+        catch (Exception ex)
+        {
+            error = $"Could not load classes: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

@@ -1,0 +1,100 @@
+@page "/members"
+@inject IAdminApi AdminApi
+
+<PageTitle>Sportclub Admin · Members</PageTitle>
+
+<header class="page-header">
+    <p class="overline">DIRECTORY</p>
+    <h1>Members</h1>
+</header>
+
+<div class="filters">
+    <input type="search" class="search-input"
+           placeholder="Search by name or email"
+           @bind="search" @bind:event="oninput"
+           @onkeydown="OnSearchKeyDownAsync" />
+    <button class="filter-button" @onclick="LoadAsync">Search</button>
+</div>
+
+@if (isLoading)
+{
+    <p class="muted">Loading members...</p>
+}
+else if (error is not null)
+{
+    <div class="error-banner">@error</div>
+}
+else if (members is null || members.Count == 0)
+{
+    <p class="muted">No members found.</p>
+}
+else
+{
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>DOB</th>
+                <th>Roles</th>
+                <th>Active plan</th>
+                <th>Plan ends</th>
+                <th>Joined</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var m in members)
+            {
+                <tr>
+                    <td><strong>@m.FirstName @m.LastName</strong></td>
+                    <td>@m.Email</td>
+                    <td>@(m.DateOfBirth?.ToString("d") ?? "—")</td>
+                    <td>
+                        @foreach (var r in m.Roles)
+                        {
+                            <span class="role-pill">@r</span>
+                        }
+                    </td>
+                    <td>@(m.ActivePlanName ?? "—")</td>
+                    <td>@(m.PlanEndsUtc is { } end ? end.LocalDateTime.ToString("d") : "—")</td>
+                    <td>@m.CreatedUtc.LocalDateTime.ToString("d")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private string search = string.Empty;
+    private IReadOnlyList<MemberAdminDto>? members;
+    private bool isLoading = true;
+    private string? error;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        isLoading = true;
+        error = null;
+        try
+        {
+            members = await AdminApi.GetMembersAsync(search);
+        }
+        catch (Exception ex)
+        {
+            error = $"Could not load members: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OnSearchKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoadAsync();
+        }
+    }
+}

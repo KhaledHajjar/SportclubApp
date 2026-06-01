@@ -1,0 +1,412 @@
+/* ============================================
+   SportclubApp.Admin global styles
+   Slate + orange to mirror the MAUI bold-sport palette
+   ============================================ */
+
+:root {
+    --brand: #F97316;
+    --brand-strong: #C2410C;
+    --slate-900: #0F172A;
+    --slate-800: #1E293B;
+    --slate-700: #334155;
+    --slate-500: #64748B;
+    --slate-300: #CBD5E1;
+    --slate-200: #E2E8F0;
+    --slate-100: #F1F5F9;
+    --slate-50: #F8FAFC;
+    --surface: #FFFFFF;
+    --danger: #DC2626;
+    --success: #16A34A;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: var(--slate-50);
+    color: var(--slate-900);
+}
+
+h1, h2, h3, p { margin: 0; }
+a { color: var(--brand); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ============================================
+   Admin shell layout
+   ============================================ */
+
+.admin-shell { display: flex; min-height: 100vh; }
+.admin-sidebar {
+    width: 260px;
+    background: var(--slate-900);
+    color: var(--slate-100);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    flex-shrink: 0;
+}
+.admin-main {
+    flex: 1;
+    background: var(--slate-50);
+    overflow-y: auto;
+}
+.admin-content {
+    padding: 32px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Sidebar brand */
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--slate-800);
+    margin-bottom: 16px;
+}
+.brand-monogram {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: white;
+    font-weight: 700;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.brand-monogram-lg { width: 72px; height: 72px; font-size: 32px; }
+.brand-text { display: flex; flex-direction: column; }
+.brand-overline {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--slate-300);
+    text-transform: uppercase;
+    margin: 0;
+    font-weight: 600;
+}
+.brand-title { font-size: 18px; font-weight: 700; color: white; }
+
+/* Sidebar nav */
+.nav-list { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 0 12px; }
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: var(--slate-300);
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.15s, color 0.15s;
+}
+.nav-item:hover { background: var(--slate-800); color: white; text-decoration: none; }
+.nav-item.active { background: var(--brand); color: white; }
+.nav-icon { width: 18px; text-align: center; font-size: 13px; }
+
+/* Sidebar footer */
+.nav-footer {
+    padding: 16px 24px 0;
+    border-top: 1px solid var(--slate-800);
+    margin-top: 16px;
+}
+.nav-user { margin-bottom: 12px; }
+.nav-user-name { font-size: 13px; font-weight: 600; color: white; }
+.nav-user-role {
+    font-size: 10px;
+    color: var(--slate-500);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+.nav-signout {
+    width: 100%;
+    padding: 8px 12px;
+    background: transparent;
+    border: 1px solid var(--slate-700);
+    color: var(--slate-300);
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+}
+.nav-signout:hover { color: white; border-color: var(--slate-500); }
+.nav-signout:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ============================================
+   Page header + utility
+   ============================================ */
+
+.page-header { margin-bottom: 28px; }
+.overline {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    margin: 0 0 6px;
+    font-weight: 600;
+}
+.page-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--slate-900);
+}
+.muted { color: var(--slate-500); font-size: 14px; }
+
+.error-banner {
+    padding: 12px 16px;
+    background: #FEE2E2;
+    color: #991B1B;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+/* ============================================
+   Stat tiles
+   ============================================ */
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+.stat-tile {
+    background: var(--surface);
+    border: 1px solid var(--slate-200);
+    border-radius: 14px;
+    padding: 20px 24px;
+}
+.stat-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    margin: 0 0 8px;
+    font-weight: 600;
+}
+.stat-value {
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--slate-900);
+    letter-spacing: -1px;
+}
+
+/* ============================================
+   Data table
+   ============================================ */
+
+.data-table {
+    width: 100%;
+    background: var(--surface);
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 14px;
+}
+.data-table thead { background: var(--slate-50); }
+.data-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--slate-200);
+    font-weight: 600;
+}
+.data-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--slate-100);
+    color: var(--slate-900);
+    vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--slate-50); }
+
+/* ============================================
+   Pills
+   ============================================ */
+
+.role-pill, .tier-pill, .workout-pill, .status-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-right: 4px;
+}
+.role-pill { background: var(--slate-100); color: var(--slate-700); }
+.tier-pill.tier-standard { background: #DBEAFE; color: #1E3A8A; }
+.tier-pill.tier-premium { background: #FED7AA; color: #9A3412; }
+.workout-pill.workout-yoga { background: #ECFCCB; color: #4D7C0F; }
+.workout-pill.workout-pilates { background: #F3E8FF; color: #7E22CE; }
+.workout-pill.workout-spinning { background: #CFFAFE; color: #155E75; }
+.workout-pill.workout-hiit { background: #FEE2E2; color: #B91C1C; }
+.status-pill.status-active { background: #DCFCE7; color: #166534; }
+.status-pill.status-cancelled { background: #FEE2E2; color: #991B1B; }
+.status-pill.status-attended { background: #DBEAFE; color: #1E3A8A; }
+.status-pill.status-noshow { background: #FEF3C7; color: #92400E; }
+
+/* ============================================
+   Filters / form controls
+   ============================================ */
+
+.filters {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.filters label {
+    font-size: 11px;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.filters input[type=date] {
+    padding: 8px 10px;
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    background: white;
+    font-size: 14px;
+    font-family: inherit;
+}
+.search-input {
+    padding: 10px 14px;
+    border: 1px solid var(--slate-200);
+    border-radius: 10px;
+    background: white;
+    font-size: 14px;
+    width: 320px;
+    font-family: inherit;
+}
+.search-input:focus, .filters input[type=date]:focus {
+    outline: 2px solid var(--brand);
+    outline-offset: -1px;
+    border-color: var(--brand);
+}
+.filter-button {
+    padding: 10px 18px;
+    background: var(--brand);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.5px;
+}
+.filter-button:hover { background: var(--brand-strong); }
+
+/* ============================================
+   Login page
+   ============================================ */
+
+.empty-layout {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--slate-900) 0%, var(--slate-800) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.login-shell { width: 100%; max-width: 420px; }
+.login-card {
+    background: white;
+    padding: 40px 32px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    text-align: center;
+}
+.login-card .brand-monogram-lg { margin: 0 auto 16px; }
+.login-card .brand-overline { color: var(--slate-500); margin: 0 0 8px; }
+.login-title { font-size: 28px; font-weight: 700; margin: 0 0 8px; }
+.login-subtitle { font-size: 13px; color: var(--slate-500); margin: 0 0 24px; }
+.login-form { text-align: left; }
+.login-form label {
+    display: block;
+    font-size: 11px;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    margin-top: 12px;
+}
+.login-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--slate-200);
+    border-radius: 10px;
+    font-size: 14px;
+    background: white;
+    font-family: inherit;
+}
+.login-input:focus {
+    outline: 2px solid var(--brand);
+    outline-offset: -1px;
+    border-color: var(--brand);
+}
+.login-submit {
+    width: 100%;
+    padding: 14px;
+    background: var(--brand);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+.login-submit:hover:not(:disabled) { background: var(--brand-strong); }
+.login-submit:disabled { background: var(--slate-300); cursor: not-allowed; }
+.login-error {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 16px;
+    text-align: center;
+}
+
+/* ============================================
+   Error UI (kept from template)
+   ============================================ */
+
+#blazor-error-ui {
+    color-scheme: light only;
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}

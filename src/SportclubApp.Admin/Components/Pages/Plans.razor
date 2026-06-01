@@ -1,0 +1,72 @@
+@page "/plans"
+@inject IAdminApi AdminApi
+
+<PageTitle>Sportclub Admin · Plans</PageTitle>
+
+<header class="page-header">
+    <p class="overline">CATALOG</p>
+    <h1>Plans</h1>
+</header>
+
+@if (isLoading)
+{
+    <p class="muted">Loading plans...</p>
+}
+else if (error is not null)
+{
+    <div class="error-banner">@error</div>
+}
+else if (plans is null || plans.Count == 0)
+{
+    <p class="muted">No plans configured.</p>
+}
+else
+{
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Plan</th>
+                <th>Tier</th>
+                <th>Billing</th>
+                <th>Duration</th>
+                <th>Price</th>
+                <th>Active subscriptions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in plans)
+            {
+                <tr>
+                    <td><strong>@p.Name</strong></td>
+                    <td><span class="tier-pill tier-@p.Tier.ToString().ToLowerInvariant()">@p.Tier</span></td>
+                    <td>@p.BillingPeriod</td>
+                    <td>@p.DurationDays days</td>
+                    <td>€@p.Price.ToString("0.00")</td>
+                    <td>@p.ActiveSubscriptionCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IReadOnlyList<PlanAdminDto>? plans;
+    private bool isLoading = true;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            plans = await AdminApi.GetPlansAsync();
+        }
+        catch (Exception ex)
+        {
+            error = $"Could not load plans: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

@@ -31,6 +31,7 @@ builder.Services.AddScoped<IWaitingListService, WaitingListService>();
 builder.Services.AddScoped<IWaitingListPromotionService, WaitingListPromotionService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<DbSeeder>();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 

@@ -1,0 +1,70 @@
+@page "/reservations"
+@inject IAdminApi AdminApi
+
+<PageTitle>Sportclub Admin · Reservations</PageTitle>
+
+<header class="page-header">
+    <p class="overline">RECENT ACTIVITY</p>
+    <h1>Reservations</h1>
+</header>
+
+@if (isLoading)
+{
+    <p class="muted">Loading reservations...</p>
+}
+else if (error is not null)
+{
+    <div class="error-banner">@error</div>
+}
+else if (reservations is null || reservations.Count == 0)
+{
+    <p class="muted">No reservations found.</p>
+}
+else
+{
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Created</th>
+                <th>Member</th>
+                <th>Class start</th>
+                <th>Workout</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in reservations)
+            {
+                <tr>
+                    <td>@r.CreatedUtc.LocalDateTime.ToString("ddd, MMM d • HH:mm")</td>
+                    <td><strong>@r.MemberName</strong></td>
+                    <td>@r.ClassStartUtc.LocalDateTime.ToString("ddd, MMM d • HH:mm")</td>
+                    <td><span class="workout-pill workout-@r.WorkoutName.ToLowerInvariant()">@r.WorkoutName</span></td>
+                    <td><span class="status-pill status-@r.Status.ToString().ToLowerInvariant()">@r.Status</span></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IReadOnlyList<ReservationAdminDto>? reservations;
+    private bool isLoading = true;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            reservations = await AdminApi.GetReservationsAsync(50);
+        }
+        catch (Exception ex)
+        {
+            error = $"Could not load reservations: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

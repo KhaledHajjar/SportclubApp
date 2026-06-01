@@ -4,4 +4,5 @@ public static class AuthRoles
 {
     public const string Member = nameof(Member);
     public const string Instructor = nameof(Instructor);
+    public const string Admin = nameof(Admin);
 }

@@ -1,0 +1,61 @@
+@page "/"
+@inject IAdminApi AdminApi
+
+<PageTitle>Sportclub Admin · Dashboard</PageTitle>
+
+<header class="page-header">
+    <p class="overline">OVERVIEW</p>
+    <h1>Dashboard</h1>
+</header>
+
+@if (isLoading)
+{
+    <p class="muted">Loading stats...</p>
+}
+else if (error is not null)
+{
+    <div class="error-banner">@error</div>
+}
+else if (stats is not null)
+{
+    <div class="stat-grid">
+        <div class="stat-tile">
+            <p class="stat-label">MEMBERS</p>
+            <p class="stat-value">@stats.TotalMembers</p>
+        </div>
+        <div class="stat-tile">
+            <p class="stat-label">ACTIVE SUBSCRIPTIONS</p>
+            <p class="stat-value">@stats.ActiveSubscriptions</p>
+        </div>
+        <div class="stat-tile">
+            <p class="stat-label">CLASSES NEXT 7 DAYS</p>
+            <p class="stat-value">@stats.ClassesThisWeek</p>
+        </div>
+        <div class="stat-tile">
+            <p class="stat-label">RESERVATIONS LAST 7 DAYS</p>
+            <p class="stat-value">@stats.ReservationsThisWeek</p>
+        </div>
+    </div>
+}
+
+@code {
+    private AdminStatsDto? stats;
+    private bool isLoading = true;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            stats = await AdminApi.GetStatsAsync();
+        }
+        catch (Exception ex)
+        {
+            error = $"Could not load stats: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

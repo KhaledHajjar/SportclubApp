@@ -124,6 +124,8 @@ public sealed class DbSeeder(
         // ---- Users (Diana first so the Instructor entity can reference her MemberId) ----
         var diana = await CreateUserAsync(
             "diana@sportclub.test", "Diana", "Smit", new DateOnly(1985, 4, 15), AuthRoles.Instructor, ct);
+        var admin = await CreateUserAsync(
+            "admin@sportclub.test", "Sportclub", "Admin", new DateOnly(1980, 1, 1), AuthRoles.Admin, ct);
         var alice = await CreateUserAsync(
             "alice@sportclub.test", "Alice", "de Vries", new DateOnly(1995, 8, 22), AuthRoles.Member, ct);
         var bob = await CreateUserAsync(
@@ -337,7 +339,7 @@ public sealed class DbSeeder(
 
         logger.LogInformation(
             "Seeded {Plans} plans, {Workouts} workouts, {Locations} locations, {Instructors} instructors, {Members} members, {Sessions} sessions. Demo class {DemoClassId} at {DemoClassStart:u}.",
-            plans.Length, workouts.Length, locations.Length, instructors.Length, 5, sessions.Count, demoClass.Id, demoClass.StartUtc);
+            plans.Length, workouts.Length, locations.Length, instructors.Length, 6, sessions.Count, demoClass.Id, demoClass.StartUtc);
     }
 
     private static Reservation ReservationFor(Member member, ClassSession session, DateTimeOffset createdUtc) => new()

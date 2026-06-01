@@ -1,0 +1,71 @@
+@inject AdminAuthState Auth
+@inject IAdminApi AdminApi
+@inject NavigationManager Nav
+
+<div class="nav-brand">
+    <div class="brand-monogram">S</div>
+    <div class="brand-text">
+        <span class="brand-overline">SPORTCLUB</span>
+        <span class="brand-title">Admin</span>
+    </div>
+</div>
+
+<nav class="nav-list">
+    <NavLink class="nav-item" href="" Match="NavLinkMatch.All">
+        <span class="nav-icon">▦</span> Dashboard
+    </NavLink>
+    <NavLink class="nav-item" href="members">
+        <span class="nav-icon">◆</span> Members
+    </NavLink>
+    <NavLink class="nav-item" href="plans">
+        <span class="nav-icon">▶</span> Plans
+    </NavLink>
+    <NavLink class="nav-item" href="classes">
+        <span class="nav-icon">◉</span> Class sessions
+    </NavLink>
+    <NavLink class="nav-item" href="reservations">
+        <span class="nav-icon">●</span> Reservations
+    </NavLink>
+</nav>
+
+<div class="nav-footer">
+    @if (Auth.IsAuthenticated)
+    {
+        <div class="nav-user">
+            <div class="nav-user-name">@Auth.DisplayName</div>
+            <div class="nav-user-role">@string.Join(" · ", Auth.Roles)</div>
+        </div>
+        <button class="nav-signout" @onclick="SignOutAsync" disabled="@isSigningOut">
+            @(isSigningOut ? "Signing out..." : "Sign out")
+        </button>
+    }
+</div>
+
+@code {
+    private bool isSigningOut;
+
+    private async Task SignOutAsync()
+    {
+        isSigningOut = true;
+        try
+        {
+            if (!string.IsNullOrEmpty(Auth.RefreshToken))
+            {
+                try
+                {
+                    await AdminApi.LogoutAsync(new LogoutRequest(Auth.RefreshToken));
+                }
+                catch
+                {
+                    // Ignore network errors on logout — clear local state regardless.
+                }
+            }
+        }
+        finally
+        {
+            Auth.Clear();
+            isSigningOut = false;
+            Nav.NavigateTo("/login");
+        }
+    }
+}

@@ -34,7 +34,7 @@ public static class IdentityExtensions
         using var scope = services.CreateScope();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
 
-        foreach (var role in new[] { AuthRoles.Member, AuthRoles.Instructor })
+        foreach (var role in new[] { AuthRoles.Member, AuthRoles.Instructor, AuthRoles.Admin })
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
