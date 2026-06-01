@@ -6,60 +6,157 @@
              x:DataType="vm:ClassDetailViewModel"
              Title="{Binding Title}">
 
+    <Grid>
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
         <ScrollView>
-            <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpacingM}">
+            <VerticalStackLayout Spacing="0">
 
-                <Label Text="{Binding ErrorMessage}"
-                       Style="{StaticResource ErrorText}"
-                       IsVisible="{Binding HasError}" />
+                <!-- Workout-coloured hero band -->
+                <Border IsVisible="{Binding HasSession}"
+                        BackgroundColor="{Binding Session.Workout.Name, Converter={StaticResource WorkoutColorConverter}}"
+                        Stroke="Transparent"
+                        StrokeThickness="0"
+                        StrokeShape="Rectangle"
+                        Padding="20,28,20,28">
+                    <VerticalStackLayout Spacing="{StaticResource SpacingS}">
+                        <Label Text="{Binding Session.Workout.Name, Converter={StaticResource ToUpperConverter}}"
+                               TextColor="{StaticResource White}"
+                               FontFamily="OpenSansSemibold"
+                               FontSize="12"
+                               CharacterSpacing="3"
+                               Opacity="0.85" />
+                        <Label Text="{Binding StartText}"
+                               TextColor="{StaticResource White}"
+                               FontFamily="OpenSansSemibold"
+                               FontSize="28"
+                               CharacterSpacing="-0.5" />
+                        <HorizontalStackLayout Spacing="6" Margin="0,4,0,0">
+                            <Label Text="{Binding InstructorName}"
+                                   TextColor="{StaticResource White}"
+                                   FontSize="14"
+                                   Opacity="0.92" />
+                            <Label Text="·"
+                                   TextColor="{StaticResource White}"
+                                   Opacity="0.6" />
+                            <Label Text="{Binding LocationName}"
+                                   TextColor="{StaticResource White}"
+                                   FontSize="14"
+                                   Opacity="0.92" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
 
-                <VerticalStackLayout IsVisible="{Binding HasSession}" Spacing="{StaticResource SpacingM}">
-                    <Label Text="{Binding WorkoutName}" Style="{StaticResource PageTitle}" />
+                <!-- Body -->
+                <VerticalStackLayout Padding="{StaticResource PagePadding}"
+                                     Spacing="{StaticResource SpacingL}"
+                                     IsVisible="{Binding HasSession}">
 
-                    <Label Text="{Binding StartText}" FontSize="{StaticResource FontSizeBodyLarge}" />
+                    <!-- Capacity meter -->
+                    <VerticalStackLayout Spacing="{StaticResource SpacingS}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="CAPACITY" Style="{StaticResource UppercaseMuted}" VerticalOptions="Center" />
+                            <Label Grid.Column="1"
+                                   Text="{Binding CapacityText}"
+                                   Style="{StaticResource Caption}"
+                                   VerticalOptions="Center" />
+                        </Grid>
+                        <Border HeightRequest="10"
+                                StrokeShape="RoundRectangle 5"
+                                Stroke="Transparent"
+                                StrokeThickness="0"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceElevatedLight}, Dark={StaticResource BorderDark}}">
+                            <Grid ColumnSpacing="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{Binding Session.CapacityFraction, Converter={StaticResource FractionLengthConverter}, ConverterParameter='filled'}" />
+                                    <ColumnDefinition Width="{Binding Session.CapacityFraction, Converter={StaticResource FractionLengthConverter}, ConverterParameter='remaining'}" />
+                                </Grid.ColumnDefinitions>
+                                <BoxView Grid.Column="0"
+                                         BackgroundColor="{Binding Session.Workout.Name, Converter={StaticResource WorkoutColorConverter}}" />
+                            </Grid>
+                        </Border>
+                        <Label Text="{Binding StatusText}"
+                               Style="{StaticResource ListItemTitle}"
+                               Margin="0,4,0,0" />
+                    </VerticalStackLayout>
 
-                    <Label Text="Instructor" Style="{StaticResource FieldLabel}" Margin="{StaticResource MarginTopM}" />
-                    <Label Text="{Binding InstructorName}" />
+                    <!-- Status banners -->
+                    <Border Padding="14,12"
+                            StrokeThickness="0"
+                            Stroke="Transparent"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource SuccessSurfaceLight}, Dark={StaticResource SuccessSurfaceDark}}"
+                            IsVisible="{Binding HasActiveReservation}">
+                        <Label Text="You're booked into this class."
+                               Style="{StaticResource SuccessText}"
+                               HorizontalOptions="Center" />
+                    </Border>
 
-                    <Label Text="Location" Style="{StaticResource FieldLabel}" />
-                    <Label Text="{Binding LocationName}" />
+                    <Border Padding="14,12"
+                            StrokeThickness="0"
+                            Stroke="Transparent"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource InfoSurfaceLight}, Dark={StaticResource InfoSurfaceDark}}"
+                            IsVisible="{Binding IsOnWaitingList}">
+                        <Label Text="You're on the waiting list — we'll notify you if a spot opens."
+                               Style="{StaticResource InfoText}"
+                               HorizontalOptions="Center" />
+                    </Border>
 
-                    <Label Text="Description" Style="{StaticResource FieldLabel}" />
-                    <Label Text="{Binding WorkoutDescription}" />
+                    <!-- Actions -->
+                    <VerticalStackLayout Spacing="{StaticResource SpacingM}">
+                        <Button Text="Reserve"
+                                Style="{StaticResource AccentButton}"
+                                Command="{Binding ReserveCommand}"
+                                IsVisible="{Binding CanReserve}" />
+                        <Button Text="Join waiting list"
+                                Style="{StaticResource SecondaryButton}"
+                                Command="{Binding JoinWaitingListCommand}"
+                                IsVisible="{Binding CanJoinWaitingList}" />
+                        <Button Text="Leave waiting list"
+                                Style="{StaticResource SecondaryButton}"
+                                Command="{Binding LeaveWaitingListCommand}"
+                                IsVisible="{Binding IsOnWaitingList}" />
+                    </VerticalStackLayout>
 
-                    <BoxView Style="{StaticResource Divider}" Margin="{StaticResource MarginVerticalM}" />
+                    <!-- About -->
+                    <VerticalStackLayout Spacing="{StaticResource SpacingS}">
+                        <Label Text="ABOUT THIS CLASS" Style="{StaticResource UppercaseMuted}" />
+                        <Label Text="{Binding WorkoutDescription}" />
+                    </VerticalStackLayout>
 
-                    <Label Text="{Binding CapacityText}" />
-                    <Label Text="{Binding StatusText}"
-                           Style="{StaticResource ListItemTitle}" />
-
-                    <Button Text="Reserve"
-                            Style="{StaticResource AccentButton}"
-                            Command="{Binding ReserveCommand}"
-                            Margin="{StaticResource MarginTopM}" />
-
-                    <Button Text="Join waiting list"
-                            Style="{StaticResource SecondaryButton}"
-                            Command="{Binding JoinWaitingListCommand}"
-                            IsVisible="{Binding CanJoinWaitingList}" />
-
-                    <Button Text="Leave waiting list"
-                            Style="{StaticResource SecondaryButton}"
-                            Command="{Binding LeaveWaitingListCommand}"
-                            IsVisible="{Binding IsOnWaitingList}" />
-
-                    <Label Text="You already have a reservation for this class."
-                           Style="{StaticResource SuccessText}"
-                           IsVisible="{Binding HasActiveReservation}"
-                           HorizontalOptions="Center" />
-
-                    <Label Text="You're on the waiting list — we'll notify you if a spot opens."
-                           Style="{StaticResource InfoText}"
-                           IsVisible="{Binding IsOnWaitingList}"
-                           HorizontalOptions="Center" />
+                    <!-- Error -->
+                    <Label Text="{Binding ErrorMessage}"
+                           Style="{StaticResource ErrorText}"
+                           IsVisible="{Binding HasError}" />
                 </VerticalStackLayout>
+
             </VerticalStackLayout>
         </ScrollView>
     </RefreshView>
+
+        <!-- Reservation success overlay. Sits on top of the page and is invisible/non-blocking until animated in. -->
+        <Grid x:Name="SuccessOverlay"
+              IsVisible="False"
+              Opacity="0"
+              InputTransparent="True"
+              BackgroundColor="#66000000">
+            <Border x:Name="SuccessIcon"
+                    WidthRequest="120"
+                    HeightRequest="120"
+                    StrokeShape="RoundRectangle 60"
+                    Stroke="Transparent"
+                    StrokeThickness="0"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Scale="0">
+                <Label Text="✓"
+                       TextColor="{StaticResource White}"
+                       FontFamily="OpenSansSemibold"
+                       FontSize="64"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </Border>
+        </Grid>
+    </Grid>
 </ContentPage>

@@ -12,13 +12,13 @@
     <x:Double x:Key="SpacingL">24</x:Double>
     <x:Double x:Key="SpacingXL">32</x:Double>
 
-    <x:Double x:Key="RadiusS">4</x:Double>
-    <x:Double x:Key="RadiusM">12</x:Double>
-    <x:Double x:Key="RadiusL">20</x:Double>
+    <x:Double x:Key="RadiusS">6</x:Double>
+    <x:Double x:Key="RadiusM">14</x:Double>
+    <x:Double x:Key="RadiusL">24</x:Double>
 
-    <Thickness x:Key="PagePadding">24</Thickness>
-    <Thickness x:Key="CardPadding">16</Thickness>
-    <Thickness x:Key="ListItemPadding">16,12</Thickness>
+    <Thickness x:Key="PagePadding">20</Thickness>
+    <Thickness x:Key="CardPadding">18</Thickness>
+    <Thickness x:Key="ListItemPadding">20,16</Thickness>
 
     <Thickness x:Key="MarginTopM">0,12,0,0</Thickness>
     <Thickness x:Key="MarginBottomM">0,0,0,12</Thickness>
@@ -33,6 +33,7 @@
     <x:Double x:Key="FontSizeSection">20</x:Double>
     <x:Double x:Key="FontSizeTitle">28</x:Double>
     <x:Double x:Key="FontSizeHero">32</x:Double>
+    <x:Double x:Key="FontSizeDisplay">36</x:Double>
 
     <!-- ============================================
          Implicit styles
@@ -106,9 +107,9 @@
         <Setter Property="TextColor" Value="{StaticResource TextOnBrand}" />
         <Setter Property="FontFamily" Value="OpenSansSemibold" />
         <Setter Property="FontSize" Value="15" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="16,12" />
-        <Setter Property="MinimumHeightRequest" Value="48" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="18,14" />
+        <Setter Property="MinimumHeightRequest" Value="52" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
@@ -241,7 +242,7 @@
     <Style x:Key="Card" TargetType="Border">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
         <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 18" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceElevatedLight}, Dark={StaticResource SurfaceElevatedDark}}" />
         <Setter Property="Padding" Value="{StaticResource CardPadding}" />
     </Style>
@@ -273,6 +274,79 @@
     <Style x:Key="Divider" TargetType="BoxView">
         <Setter Property="HeightRequest" Value="1" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+    </Style>
+
+    <!-- ============================================
+         Bold-sport elements
+         ============================================ -->
+
+    <!-- Large numeric time display, e.g. "09:00" on the schedule card -->
+    <Style x:Key="HeroTime" TargetType="Label" BasedOn="{StaticResource DefaultLabel}">
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeDisplay}" />
+        <Setter Property="CharacterSpacing" Value="-1" />
+    </Style>
+
+    <!-- Uppercase workout name shown inside a coloured chip -->
+    <Style x:Key="WorkoutLabel" TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource White}" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="CharacterSpacing" Value="2" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <!-- Pill-shaped Border holding the workout label; background colour is set per-instance from WorkoutColorConverter -->
+    <Style x:Key="WorkoutChip" TargetType="Border">
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Stroke" Value="Transparent" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+        <Setter Property="Padding" Value="10,5" />
+        <Setter Property="HeightRequest" Value="26" />
+    </Style>
+
+    <!-- Small uppercase brand-tinted text for "6 FREE" / "FULL" / "WAITLIST" indicators -->
+    <Style x:Key="UppercaseAccent" TargetType="Label" BasedOn="{StaticResource DefaultLabel}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BrandLight}, Dark={StaticResource BrandDark}}" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="CharacterSpacing" Value="2" />
+    </Style>
+
+    <Style x:Key="UppercaseMuted" TargetType="Label" BasedOn="{StaticResource DefaultLabel}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="CharacterSpacing" Value="2" />
+    </Style>
+
+    <!-- Slim capacity bar track; the fill is a sibling Border anchored Start with WidthRequest computed by the page -->
+    <Style x:Key="CapacityTrack" TargetType="Border">
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Stroke" Value="Transparent" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 4" />
+        <Setter Property="HeightRequest" Value="6" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceElevatedLight}, Dark={StaticResource BorderDark}}" />
+    </Style>
+
+    <!-- Bordered container around an Entry / Picker so form fields look like distinct cards. -->
+    <Style x:Key="FormField" TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Padding" Value="14,2" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceElevatedDark}}" />
+    </Style>
+
+    <!-- Circular brand-coloured monogram, used on Login / Register splashes. -->
+    <Style x:Key="BrandMonogram" TargetType="Border">
+        <Setter Property="WidthRequest" Value="80" />
+        <Setter Property="HeightRequest" Value="80" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 40" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Stroke" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BrandLight}, Dark={StaticResource BrandDark}}" />
     </Style>
 
 </ResourceDictionary>

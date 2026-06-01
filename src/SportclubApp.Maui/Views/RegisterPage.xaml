@@ -8,38 +8,61 @@
              Shell.NavBarIsVisible="True">
 
     <ScrollView>
-        <VerticalStackLayout Padding="{StaticResource PagePadding}"
+        <VerticalStackLayout Padding="24,12,24,32"
                              Spacing="{StaticResource SpacingM}">
+
+            <Border Style="{StaticResource BrandMonogram}" HorizontalOptions="Center" Margin="0,12,0,0">
+                <Label Text="S"
+                       TextColor="{StaticResource White}"
+                       FontFamily="OpenSansSemibold"
+                       FontSize="40"
+                       CharacterSpacing="-1"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </Border>
+
+            <Label Text="SPORTCLUB"
+                   Style="{StaticResource UppercaseMuted}"
+                   HorizontalOptions="Center"
+                   CharacterSpacing="4"
+                   Margin="0,8,0,0" />
+
             <Label Text="Join Sportclub"
-                   Style="{StaticResource HeroTitle}" />
-            <Label Text="Create your account to manage your classes"
+                   Style="{StaticResource HeroTitle}"
+                   HorizontalOptions="Center" />
+
+            <Label Text="Create your account to start booking classes"
                    Style="{StaticResource Caption}"
                    HorizontalOptions="Center"
-                   Margin="{StaticResource MarginBottomM}" />
+                   Margin="0,0,0,16" />
 
-            <Label Text="First name" Style="{StaticResource FieldLabel}" />
-            <Entry Placeholder="Alice"
-                   Text="{Binding FirstName}" />
+            <Border Style="{StaticResource FormField}">
+                <Entry Placeholder="First name"
+                       Text="{Binding FirstName}" />
+            </Border>
 
-            <Label Text="Last name" Style="{StaticResource FieldLabel}" />
-            <Entry Placeholder="de Vries"
-                   Text="{Binding LastName}" />
+            <Border Style="{StaticResource FormField}">
+                <Entry Placeholder="Last name"
+                       Text="{Binding LastName}" />
+            </Border>
 
-            <Label Text="Email" Style="{StaticResource FieldLabel}" />
-            <Entry Placeholder="you@example.com"
-                   Keyboard="Email"
-                   Text="{Binding Email}" />
+            <Border Style="{StaticResource FormField}">
+                <Entry Placeholder="Email"
+                       Keyboard="Email"
+                       Text="{Binding Email}" />
+            </Border>
 
-            <Label Text="Password" Style="{StaticResource FieldLabel}" />
-            <Entry Placeholder="At least 8 characters"
-                   IsPassword="True"
-                   Text="{Binding Password}" />
+            <Border Style="{StaticResource FormField}">
+                <Entry Placeholder="Password (at least 8 characters)"
+                       IsPassword="True"
+                       Text="{Binding Password}" />
+            </Border>
 
             <Button Text="Create account"
                     Style="{StaticResource AccentButton}"
                     Command="{Binding SignUpCommand}"
                     IsEnabled="{Binding IsNotBusy}"
-                    Margin="{StaticResource MarginTopM}" />
+                    Margin="0,12,0,0" />
 
             <ActivityIndicator IsRunning="{Binding IsBusy}"
                                IsVisible="{Binding IsBusy}"
@@ -53,7 +76,8 @@
             <Button Text="Already have an account? Sign in"
                     Style="{StaticResource LinkButton}"
                     Command="{Binding BackToSignInCommand}"
-                    HorizontalOptions="Center" />
+                    HorizontalOptions="Center"
+                    Margin="0,12,0,0" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

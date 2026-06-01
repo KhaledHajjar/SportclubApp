@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:SportclubApp.Maui.ViewModels"
              xmlns:dtos="clr-namespace:SportclubApp.Shared.Dtos;assembly=SportclubApp.Shared"
              xmlns:groups="clr-namespace:CommunityToolkit.Mvvm.Collections;assembly=CommunityToolkit.Mvvm"
@@ -12,7 +13,8 @@
 
         <Border Grid.Row="0"
                 Style="{StaticResource WarningBanner}"
-                IsVisible="{Binding HasError}">
+                IsVisible="{Binding HasError}"
+                Margin="20,12,20,0">
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpacingM}">
                 <Label Text="{Binding ErrorMessage}" VerticalOptions="Center" />
                 <Button Grid.Column="1"
@@ -32,47 +34,108 @@
 
                 <CollectionView.GroupHeaderTemplate>
                     <DataTemplate x:DataType="groups:ObservableGroup(x:String, dtos:ClassSessionDto)">
-                        <Label Text="{Binding Key}"
-                               Style="{StaticResource SectionTitle}"
-                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceElevatedLight}, Dark={StaticResource SurfaceElevatedDark}}"
-                               Padding="16,8" />
+                        <Label Text="{Binding Key, Converter={StaticResource ToUpperConverter}}"
+                               Style="{StaticResource UppercaseMuted}"
+                               Padding="20,20,20,10" />
                     </DataTemplate>
                 </CollectionView.GroupHeaderTemplate>
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="dtos:ClassSessionDto">
-                        <Grid Padding="{StaticResource ListItemPadding}"
-                              ColumnDefinitions="Auto,*,Auto"
-                              ColumnSpacing="{StaticResource SpacingM}">
-                            <Grid.GestureRecognizers>
+                        <Border Margin="20,0,20,12"
+                                Padding="{StaticResource CardPadding}"
+                                StrokeShape="RoundRectangle 18"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceElevatedDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}"
+                                StrokeThickness="1">
+                            <Border.Behaviors>
+                                <toolkit:TouchBehavior
+                                    DefaultScale="1"
+                                    PressedScale="0.97"
+                                    DefaultAnimationDuration="120"
+                                    PressedAnimationDuration="80" />
+                            </Border.Behaviors>
+                            <Border.GestureRecognizers>
                                 <TapGestureRecognizer
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ScheduleViewModel}}, Path=OpenClassCommand}"
                                     CommandParameter="{Binding}" />
-                            </Grid.GestureRecognizers>
+                            </Border.GestureRecognizers>
 
-                            <Label Text="{Binding StartUtc, StringFormat='{0:HH\\:mm}'}"
-                                   Style="{StaticResource ListItemTitle}"
-                                   VerticalOptions="Center" />
-                            <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                <Label Text="{Binding Workout.Name}" FontSize="{StaticResource FontSizeBodyLarge}" />
-                                <Label Text="{Binding Location.Name}" Style="{StaticResource Caption}" />
-                            </VerticalStackLayout>
-                            <Label Grid.Column="2"
-                                   Text="{Binding FreeSpots, StringFormat='{0} free'}"
-                                   Style="{StaticResource SuccessText}"
-                                   FontSize="{StaticResource FontSizeCaption}"
-                                   VerticalOptions="Center" />
-                        </Grid>
+                            <Grid RowDefinitions="Auto,Auto,Auto"
+                                  RowSpacing="{StaticResource SpacingM}">
+
+                                <!-- Row 1: time + workout chip -->
+                                <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                                    <Label Text="{Binding StartUtc, StringFormat='{0:HH\\:mm}'}"
+                                           Style="{StaticResource HeroTime}"
+                                           VerticalOptions="Center" />
+                                    <Border Grid.Column="1"
+                                            Style="{StaticResource WorkoutChip}"
+                                            BackgroundColor="{Binding Workout.Name, Converter={StaticResource WorkoutColorConverter}}"
+                                            VerticalOptions="Center">
+                                        <Label Text="{Binding Workout.Name, Converter={StaticResource ToUpperConverter}}"
+                                               Style="{StaticResource WorkoutLabel}" />
+                                    </Border>
+                                </Grid>
+
+                                <!-- Row 2: instructor · location -->
+                                <HorizontalStackLayout Grid.Row="1" Spacing="6">
+                                    <Label Text="{Binding Instructor.FirstName}" Style="{StaticResource Caption}" />
+                                    <Label Text="·" Style="{StaticResource Caption}" />
+                                    <Label Text="{Binding Location.Name}" Style="{StaticResource Caption}" />
+                                </HorizontalStackLayout>
+
+                                <!-- Row 3: capacity bar + status -->
+                                <Grid Grid.Row="2"
+                                      ColumnDefinitions="*,Auto"
+                                      ColumnSpacing="{StaticResource SpacingM}"
+                                      VerticalOptions="Center">
+
+                                    <Border HeightRequest="6"
+                                            StrokeShape="RoundRectangle 3"
+                                            Stroke="Transparent"
+                                            StrokeThickness="0"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceElevatedLight}, Dark={StaticResource BorderDark}}"
+                                            VerticalOptions="Center">
+                                        <Grid ColumnSpacing="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="{Binding CapacityFraction, Converter={StaticResource FractionLengthConverter}, ConverterParameter='filled'}" />
+                                                <ColumnDefinition Width="{Binding CapacityFraction, Converter={StaticResource FractionLengthConverter}, ConverterParameter='remaining'}" />
+                                            </Grid.ColumnDefinitions>
+                                            <BoxView Grid.Column="0"
+                                                     BackgroundColor="{Binding Workout.Name, Converter={StaticResource WorkoutColorConverter}}" />
+                                        </Grid>
+                                    </Border>
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding FreeSpots, StringFormat='{0} FREE'}"
+                                           FontFamily="OpenSansSemibold"
+                                           FontSize="11"
+                                           CharacterSpacing="2"
+                                           TextColor="{AppThemeBinding Light={StaticResource BrandLight}, Dark={StaticResource BrandDark}}"
+                                           IsVisible="{Binding IsFull, Converter={StaticResource InvertedBoolConverter}}"
+                                           VerticalOptions="Center" />
+                                    <Label Grid.Column="1"
+                                           Text="FULL"
+                                           FontFamily="OpenSansSemibold"
+                                           FontSize="11"
+                                           CharacterSpacing="2"
+                                           TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"
+                                           IsVisible="{Binding IsFull}"
+                                           VerticalOptions="Center" />
+                                </Grid>
+                            </Grid>
+                        </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
 
                 <CollectionView.EmptyView>
-                    <ContentView>
-                        <Label Text="No classes in the next 7 days."
-                               Style="{StaticResource Caption}"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               Padding="{StaticResource SpacingXL}" />
+                    <ContentView Padding="{StaticResource SpacingXL}">
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="{StaticResource SpacingM}">
+                            <Label Text="No classes in the next 7 days."
+                                   Style="{StaticResource Caption}"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
                     </ContentView>
                 </CollectionView.EmptyView>
             </CollectionView>

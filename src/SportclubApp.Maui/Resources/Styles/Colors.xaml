@@ -4,69 +4,80 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
     <!-- ============================================
-         Brand
+         Brand — warm orange for primary actions and energy moments.
+         Sport-flavoured palette: high contrast, bold accent.
          ============================================ -->
-    <Color x:Key="BrandLight">#1D4ED8</Color>
-    <Color x:Key="BrandDark">#3B82F6</Color>
-    <Color x:Key="BrandStrongLight">#1E3A8A</Color>
-    <Color x:Key="BrandStrongDark">#93C5FD</Color>
+    <Color x:Key="BrandLight">#F97316</Color>          <!-- orange-500 -->
+    <Color x:Key="BrandDark">#FB923C</Color>           <!-- orange-400, brighter for dark mode -->
+    <Color x:Key="BrandStrongLight">#C2410C</Color>    <!-- orange-700 -->
+    <Color x:Key="BrandStrongDark">#FDBA74</Color>     <!-- orange-300 -->
 
-    <Color x:Key="AccentLight">#F87171</Color>
-    <Color x:Key="AccentDark">#FCA5A5</Color>
+    <Color x:Key="AccentLight">#2563EB</Color>         <!-- blue-600 -->
+    <Color x:Key="AccentDark">#60A5FA</Color>          <!-- blue-400 -->
 
     <!-- ============================================
-         Surfaces & neutrals
+         Surfaces & neutrals (slate family)
          ============================================ -->
     <Color x:Key="SurfaceLight">#FFFFFF</Color>
-    <Color x:Key="SurfaceDark">#0B1220</Color>
+    <Color x:Key="SurfaceDark">#0F172A</Color>         <!-- slate-900 -->
 
-    <Color x:Key="SurfaceElevatedLight">#F5F7FB</Color>
-    <Color x:Key="SurfaceElevatedDark">#141C2F</Color>
+    <Color x:Key="SurfaceElevatedLight">#F8FAFC</Color> <!-- slate-50 -->
+    <Color x:Key="SurfaceElevatedDark">#1E293B</Color>  <!-- slate-800 -->
 
-    <Color x:Key="BorderLight">#E2E8F0</Color>
-    <Color x:Key="BorderDark">#27324A</Color>
+    <Color x:Key="BorderLight">#E2E8F0</Color>          <!-- slate-200 -->
+    <Color x:Key="BorderDark">#334155</Color>           <!-- slate-700 -->
 
-    <Color x:Key="TextPrimaryLight">#0B1220</Color>
-    <Color x:Key="TextPrimaryDark">#F1F5F9</Color>
+    <Color x:Key="TextPrimaryLight">#0F172A</Color>     <!-- slate-900 -->
+    <Color x:Key="TextPrimaryDark">#F1F5F9</Color>      <!-- slate-100 -->
 
-    <Color x:Key="TextSecondaryLight">#5B6678</Color>
-    <Color x:Key="TextSecondaryDark">#A0AABA</Color>
+    <Color x:Key="TextSecondaryLight">#475569</Color>   <!-- slate-600 -->
+    <Color x:Key="TextSecondaryDark">#94A3B8</Color>    <!-- slate-400 -->
 
     <Color x:Key="TextOnBrand">#FFFFFF</Color>
 
     <!-- ============================================
+         Per-workout accent chips
+         Each workout has a distinct hue so the schedule reads at a glance.
+         ============================================ -->
+    <Color x:Key="WorkoutYoga">#84CC16</Color>          <!-- lime-500 — growth, mind-body -->
+    <Color x:Key="WorkoutPilates">#A855F7</Color>       <!-- purple-500 — controlled, refined -->
+    <Color x:Key="WorkoutSpinning">#06B6D4</Color>      <!-- cyan-500 — motion, energy -->
+    <Color x:Key="WorkoutHIIT">#EF4444</Color>          <!-- red-500 — intensity -->
+    <Color x:Key="WorkoutDefault">#64748B</Color>       <!-- slate-500 — unknown workout fallback -->
+
+    <!-- ============================================
          Semantic
          ============================================ -->
-    <Color x:Key="SuccessLight">#16A34A</Color>
-    <Color x:Key="SuccessDark">#34D399</Color>
+    <Color x:Key="SuccessLight">#16A34A</Color>         <!-- green-600 -->
+    <Color x:Key="SuccessDark">#4ADE80</Color>          <!-- green-400 -->
 
-    <Color x:Key="WarningLight">#F59E0B</Color>
-    <Color x:Key="WarningDark">#FBBF24</Color>
+    <Color x:Key="WarningLight">#F59E0B</Color>         <!-- amber-500 -->
+    <Color x:Key="WarningDark">#FCD34D</Color>          <!-- amber-300 -->
 
-    <Color x:Key="DangerLight">#DC2626</Color>
-    <Color x:Key="DangerDark">#F87171</Color>
+    <Color x:Key="DangerLight">#DC2626</Color>          <!-- red-600 -->
+    <Color x:Key="DangerDark">#F87171</Color>           <!-- red-400 -->
 
-    <Color x:Key="InfoLight">#0EA5E9</Color>
-    <Color x:Key="InfoDark">#38BDF8</Color>
+    <Color x:Key="InfoLight">#0EA5E9</Color>            <!-- sky-500 -->
+    <Color x:Key="InfoDark">#38BDF8</Color>             <!-- sky-400 -->
 
-    <!-- Tinted backgrounds for banners (10% opacity of the semantic colour) -->
-    <Color x:Key="WarningSurfaceLight">#FFF6E0</Color>
-    <Color x:Key="WarningSurfaceDark">#3A2E12</Color>
+    <!-- Tinted backgrounds for banners (light = paper-tint, dark = deep-tinted) -->
+    <Color x:Key="WarningSurfaceLight">#FEF3C7</Color>  <!-- amber-100 -->
+    <Color x:Key="WarningSurfaceDark">#451A03</Color>   <!-- amber-950 -->
 
-    <Color x:Key="DangerSurfaceLight">#FEF1F1</Color>
-    <Color x:Key="DangerSurfaceDark">#3F1A1A</Color>
+    <Color x:Key="DangerSurfaceLight">#FEE2E2</Color>   <!-- red-100 -->
+    <Color x:Key="DangerSurfaceDark">#450A0A</Color>    <!-- red-950 -->
 
-    <Color x:Key="SuccessSurfaceLight">#E8F8EE</Color>
-    <Color x:Key="SuccessSurfaceDark">#0F2A1B</Color>
+    <Color x:Key="SuccessSurfaceLight">#DCFCE7</Color>  <!-- green-100 -->
+    <Color x:Key="SuccessSurfaceDark">#052E16</Color>   <!-- green-950 -->
 
-    <Color x:Key="InfoSurfaceLight">#E6F4FB</Color>
-    <Color x:Key="InfoSurfaceDark">#0F2436</Color>
+    <Color x:Key="InfoSurfaceLight">#E0F2FE</Color>     <!-- sky-100 -->
+    <Color x:Key="InfoSurfaceDark">#082F49</Color>      <!-- sky-950 -->
 
     <!-- ============================================
          Convenience
          ============================================ -->
     <Color x:Key="White">#FFFFFF</Color>
-    <Color x:Key="Black">#0B1220</Color>
+    <Color x:Key="Black">#0F172A</Color>
     <Color x:Key="Transparent">#00000000</Color>
 
 </ResourceDictionary>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:SportclubApp.Maui.ViewModels"
              x:Class="SportclubApp.Maui.Views.MyReservationsPage"
              x:DataType="vm:MyReservationsViewModel"
@@ -10,7 +11,8 @@
 
         <Border Grid.Row="0"
                 Style="{StaticResource WarningBanner}"
-                IsVisible="{Binding HasError}">
+                IsVisible="{Binding HasError}"
+                Margin="20,12,20,0">
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpacingM}">
                 <Label Text="{Binding ErrorMessage}" VerticalOptions="Center" />
                 <Button Grid.Column="1"
@@ -27,40 +29,86 @@
             <CollectionView ItemsSource="{Binding Reservations}"
                             SelectionMode="None">
 
+                <CollectionView.Header>
+                    <ContentView Padding="20,12,20,0" />
+                </CollectionView.Header>
+
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:ReservationItemViewModel">
-                        <Grid Padding="{StaticResource ListItemPadding}"
-                              ColumnDefinitions="*,Auto"
-                              ColumnSpacing="{StaticResource SpacingM}">
-                            <Grid.GestureRecognizers>
+                        <Border Margin="20,0,20,12"
+                                Padding="{StaticResource CardPadding}"
+                                StrokeShape="RoundRectangle 18"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceElevatedDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}"
+                                StrokeThickness="1">
+                            <Border.Behaviors>
+                                <toolkit:TouchBehavior
+                                    DefaultScale="1"
+                                    PressedScale="0.97"
+                                    DefaultAnimationDuration="120"
+                                    PressedAnimationDuration="80" />
+                            </Border.Behaviors>
+                            <Border.GestureRecognizers>
                                 <TapGestureRecognizer
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MyReservationsViewModel}}, Path=OpenCommand}"
                                     CommandParameter="{Binding}" />
-                            </Grid.GestureRecognizers>
+                            </Border.GestureRecognizers>
 
-                            <VerticalStackLayout Spacing="2">
-                                <Label Text="{Binding WorkoutName}" Style="{StaticResource ListItemTitle}" />
-                                <Label Text="{Binding LocationLine}" Style="{StaticResource Caption}" />
-                                <Label Text="{Binding StatusText}" Style="{StaticResource Caption}" />
-                            </VerticalStackLayout>
+                            <Grid RowDefinitions="Auto,Auto"
+                                  RowSpacing="{StaticResource SpacingM}">
 
-                            <Button Grid.Column="1"
-                                    Text="Cancel"
-                                    Style="{StaticResource DangerButton}"
-                                    IsVisible="{Binding CanCancel}"
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MyReservationsViewModel}}, Path=CancelCommand}"
-                                    CommandParameter="{Binding}" />
-                        </Grid>
+                                <!-- Row 1: workout + chip -->
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                                        <Label Text="{Binding WorkoutName}"
+                                               FontFamily="OpenSansSemibold"
+                                               FontSize="18" />
+                                        <HorizontalStackLayout Spacing="6">
+                                            <Label Text="{Binding StartText}" Style="{StaticResource Caption}" />
+                                            <Label Text="·" Style="{StaticResource Caption}" />
+                                            <Label Text="{Binding LocationName}" Style="{StaticResource Caption}" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+
+                                    <Border Grid.Column="1"
+                                            Style="{StaticResource WorkoutChip}"
+                                            BackgroundColor="{Binding WorkoutName, Converter={StaticResource WorkoutColorConverter}}"
+                                            VerticalOptions="Start">
+                                        <Label Text="{Binding WorkoutName, Converter={StaticResource ToUpperConverter}}"
+                                               Style="{StaticResource WorkoutLabel}" />
+                                    </Border>
+                                </Grid>
+
+                                <!-- Row 2: status + cancel button -->
+                                <Grid Grid.Row="1"
+                                      ColumnDefinitions="*,Auto"
+                                      ColumnSpacing="{StaticResource SpacingM}"
+                                      VerticalOptions="Center">
+                                    <Label Text="{Binding StatusText, Converter={StaticResource ToUpperConverter}}"
+                                           Style="{StaticResource UppercaseAccent}"
+                                           VerticalOptions="Center" />
+                                    <Button Grid.Column="1"
+                                            Text="Cancel"
+                                            Style="{StaticResource DangerButton}"
+                                            IsVisible="{Binding CanCancel}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MyReservationsViewModel}}, Path=CancelCommand}"
+                                            CommandParameter="{Binding}"
+                                            MinimumHeightRequest="40"
+                                            Padding="16,8"
+                                            FontSize="13" />
+                                </Grid>
+                            </Grid>
+                        </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
 
                 <CollectionView.EmptyView>
-                    <ContentView>
-                        <Label Text="You haven't reserved any classes yet."
-                               Style="{StaticResource Caption}"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               Padding="{StaticResource SpacingXL}" />
+                    <ContentView Padding="{StaticResource SpacingXL}">
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="{StaticResource SpacingM}">
+                            <Label Text="You haven't reserved any classes yet."
+                                   Style="{StaticResource Caption}"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
                     </ContentView>
                 </CollectionView.EmptyView>
             </CollectionView>

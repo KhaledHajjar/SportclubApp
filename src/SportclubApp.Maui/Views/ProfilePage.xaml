@@ -9,75 +9,109 @@
     <RefreshView IsRefreshing="{Binding IsBusy}"
                  Command="{Binding LoadCommand}">
         <ScrollView>
-            <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpacingM}">
+            <VerticalStackLayout Padding="{StaticResource PagePadding}"
+                                 Spacing="{StaticResource SpacingL}">
 
-                <Grid HorizontalOptions="Center" WidthRequest="120" HeightRequest="120">
-                    <Border StrokeShape="RoundRectangle 60"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceElevatedLight}, Dark={StaticResource SurfaceElevatedDark}}">
-                        <Label Text="{Binding InitialsFallback}"
-                               FontSize="36"
-                               FontAttributes="Bold"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               IsVisible="{Binding HasPhoto, Converter={StaticResource InvertedBoolConverter}, FallbackValue=true}" />
-                    </Border>
-                    <Border StrokeShape="RoundRectangle 60"
-                            IsVisible="{Binding HasPhoto}">
-                        <Image Source="{Binding ProfilePhoto}"
-                               Aspect="AspectFill" />
-                    </Border>
-                </Grid>
-
-                <Button Text="Change photo"
-                        Style="{StaticResource SecondaryButton}"
-                        Command="{Binding ChangePhotoCommand}"
-                        IsEnabled="{Binding IsNotBusy}" />
-
-                <Label Text="Email" Style="{StaticResource FieldLabel}" />
-                <Label Text="{Binding Email}" />
-
-                <Label Text="First name" Style="{StaticResource FieldLabel}" />
-                <Entry Text="{Binding FirstName}" />
-
-                <Label Text="Last name" Style="{StaticResource FieldLabel}" />
-                <Entry Text="{Binding LastName}" />
-
-                <Label Text="Date of birth" Style="{StaticResource FieldLabel}" />
-                <Grid ColumnDefinitions="*,Auto">
-                    <DatePicker Date="{Binding DateOfBirth}"
-                                IsEnabled="{Binding HasDateOfBirth}" />
-                    <Switch Grid.Column="1"
-                            IsToggled="{Binding HasDateOfBirth}" />
-                </Grid>
-
-                <Button Text="Save"
-                        Command="{Binding SaveCommand}"
-                        IsEnabled="{Binding IsNotBusy}" />
-
-                <Label Text="{Binding ErrorMessage}"
-                       Style="{StaticResource ErrorText}"
-                       IsVisible="{Binding HasError}" />
-
-                <BoxView Style="{StaticResource Divider}" Margin="{StaticResource MarginVerticalM}" />
-
-                <Label Text="Subscription" Style="{StaticResource SectionTitle}" />
-
-                <VerticalStackLayout IsVisible="{Binding HasSubscription}" Spacing="{StaticResource SpacingXS}">
-                    <Label Text="{Binding PlanNameText}" FontSize="{StaticResource FontSizeBodyLarge}" />
-                    <Label Text="{Binding PlanTierText}" Style="{StaticResource Caption}" />
-                    <Label Text="{Binding SubscriptionEndsText}" />
+                <!-- Photo + email hero -->
+                <VerticalStackLayout HorizontalOptions="Center" Spacing="{StaticResource SpacingM}">
+                    <Grid WidthRequest="120" HeightRequest="120" HorizontalOptions="Center">
+                        <Border StrokeShape="RoundRectangle 60"
+                                StrokeThickness="0"
+                                Stroke="Transparent"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceElevatedLight}, Dark={StaticResource SurfaceElevatedDark}}">
+                            <Label Text="{Binding InitialsFallback}"
+                                   FontSize="40"
+                                   FontFamily="OpenSansSemibold"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   IsVisible="{Binding HasPhoto, Converter={StaticResource InvertedBoolConverter}, FallbackValue=true}" />
+                        </Border>
+                        <Border StrokeShape="RoundRectangle 60"
+                                StrokeThickness="0"
+                                Stroke="Transparent"
+                                IsVisible="{Binding HasPhoto}">
+                            <Image Source="{Binding ProfilePhoto}"
+                                   Aspect="AspectFill" />
+                        </Border>
+                    </Grid>
+                    <Button Text="Change photo"
+                            Style="{StaticResource LinkButton}"
+                            Command="{Binding ChangePhotoCommand}"
+                            IsEnabled="{Binding IsNotBusy}" />
+                    <Label Text="{Binding Email}"
+                           Style="{StaticResource Caption}"
+                           HorizontalOptions="Center" />
                 </VerticalStackLayout>
 
-                <Label Text="No active subscription."
-                       Style="{StaticResource Caption}"
-                       IsVisible="{Binding HasSubscription, Converter={StaticResource InvertedBoolConverter}, FallbackValue=true}" />
+                <!-- Subscription card -->
+                <Border Style="{StaticResource Card}"
+                        IsVisible="{Binding HasSubscription}">
+                    <VerticalStackLayout Spacing="{StaticResource SpacingS}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="SUBSCRIPTION"
+                                   Style="{StaticResource UppercaseMuted}"
+                                   VerticalOptions="Center" />
+                            <Border Grid.Column="1"
+                                    Style="{StaticResource WorkoutChip}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BrandLight}, Dark={StaticResource BrandDark}}">
+                                <Label Text="{Binding PlanTierText, Converter={StaticResource ToUpperConverter}}"
+                                       Style="{StaticResource WorkoutLabel}" />
+                            </Border>
+                        </Grid>
+                        <Label Text="{Binding PlanNameText}"
+                               FontFamily="OpenSansSemibold"
+                               FontSize="20" />
+                        <Label Text="{Binding SubscriptionEndsText}"
+                               Style="{StaticResource Caption}" />
+                    </VerticalStackLayout>
+                </Border>
 
-                <BoxView Style="{StaticResource Divider}" Margin="{StaticResource MarginVerticalM}" />
+                <Border Style="{StaticResource Card}"
+                        IsVisible="{Binding HasSubscription, Converter={StaticResource InvertedBoolConverter}, FallbackValue=true}">
+                    <Label Text="No active subscription."
+                           Style="{StaticResource Caption}"
+                           HorizontalOptions="Center" />
+                </Border>
 
+                <!-- Personal details -->
+                <VerticalStackLayout Spacing="{StaticResource SpacingS}">
+                    <Label Text="PERSONAL DETAILS" Style="{StaticResource UppercaseMuted}" />
+
+                    <Border Style="{StaticResource FormField}">
+                        <Entry Placeholder="First name" Text="{Binding FirstName}" />
+                    </Border>
+
+                    <Border Style="{StaticResource FormField}">
+                        <Entry Placeholder="Last name" Text="{Binding LastName}" />
+                    </Border>
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpacingM}">
+                        <Border Style="{StaticResource FormField}">
+                            <DatePicker Date="{Binding DateOfBirth}"
+                                        IsEnabled="{Binding HasDateOfBirth}" />
+                        </Border>
+                        <Switch Grid.Column="1"
+                                IsToggled="{Binding HasDateOfBirth}"
+                                VerticalOptions="Center" />
+                    </Grid>
+
+                    <Button Text="Save"
+                            Style="{StaticResource AccentButton}"
+                            Command="{Binding SaveCommand}"
+                            IsEnabled="{Binding IsNotBusy}"
+                            Margin="0,8,0,0" />
+
+                    <Label Text="{Binding ErrorMessage}"
+                           Style="{StaticResource ErrorText}"
+                           IsVisible="{Binding HasError}" />
+                </VerticalStackLayout>
+
+                <!-- Sign out -->
                 <Button Text="Sign out"
                         Style="{StaticResource SecondaryButton}"
                         Command="{Binding SignOutCommand}"
-                        IsEnabled="{Binding IsNotBusy}" />
+                        IsEnabled="{Binding IsNotBusy}"
+                        Margin="0,8,0,0" />
 
             </VerticalStackLayout>
         </ScrollView>

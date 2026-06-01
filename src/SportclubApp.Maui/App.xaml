@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:local="clr-namespace:SportclubApp.Maui"
+             xmlns:converters="clr-namespace:SportclubApp.Maui.Converters"
              x:Class="SportclubApp.Maui.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -13,6 +14,9 @@
             <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
             <toolkit:IsStringNotNullOrEmptyConverter x:Key="IsStringNotNullOrEmptyConverter" />
             <toolkit:IsNullConverter x:Key="IsNullConverter" />
+            <converters:WorkoutColorConverter x:Key="WorkoutColorConverter" />
+            <converters:ToUpperConverter x:Key="ToUpperConverter" />
+            <converters:FractionLengthConverter x:Key="FractionLengthConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

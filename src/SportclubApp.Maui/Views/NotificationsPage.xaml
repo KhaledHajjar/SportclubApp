@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:SportclubApp.Maui.ViewModels"
              xmlns:dtos="clr-namespace:SportclubApp.Shared.Dtos;assembly=SportclubApp.Shared"
              x:Class="SportclubApp.Maui.Views.NotificationsPage"
@@ -15,7 +16,8 @@
     <Grid RowDefinitions="Auto,*">
         <Border Grid.Row="0"
                 Style="{StaticResource WarningBanner}"
-                IsVisible="{Binding HasError}">
+                IsVisible="{Binding HasError}"
+                Margin="20,12,20,0">
             <Label Text="{Binding ErrorMessage}" />
         </Border>
 
@@ -23,40 +25,61 @@
                      IsRefreshing="{Binding IsBusy}"
                      Command="{Binding LoadCommand}">
             <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
+
+                <CollectionView.Header>
+                    <ContentView Padding="20,12,20,0" />
+                </CollectionView.Header>
+
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="dtos:NotificationDto">
-                        <Grid Padding="{StaticResource ListItemPadding}"
-                              ColumnDefinitions="Auto,*"
-                              ColumnSpacing="{StaticResource SpacingM}">
-                            <Grid.GestureRecognizers>
+                        <Border Margin="20,0,20,8"
+                                Padding="{StaticResource CardPadding}"
+                                StrokeShape="RoundRectangle 14"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceElevatedDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}"
+                                StrokeThickness="1">
+                            <Border.Behaviors>
+                                <toolkit:TouchBehavior
+                                    DefaultScale="1"
+                                    PressedScale="0.97"
+                                    DefaultAnimationDuration="120"
+                                    PressedAnimationDuration="80" />
+                            </Border.Behaviors>
+                            <Border.GestureRecognizers>
                                 <TapGestureRecognizer
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:NotificationsViewModel}}, Path=OpenCommand}"
                                     CommandParameter="{Binding}" />
-                            </Grid.GestureRecognizers>
+                            </Border.GestureRecognizers>
 
-                            <BoxView WidthRequest="10"
-                                     HeightRequest="10"
-                                     CornerRadius="5"
-                                     BackgroundColor="{AppThemeBinding Light={StaticResource BrandLight}, Dark={StaticResource BrandDark}}"
-                                     VerticalOptions="Center"
-                                     IsVisible="{Binding ReadUtc, Converter={StaticResource IsNullConverter}}" />
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="{StaticResource SpacingM}">
+                                <BoxView WidthRequest="10"
+                                         HeightRequest="10"
+                                         CornerRadius="5"
+                                         BackgroundColor="{AppThemeBinding Light={StaticResource BrandLight}, Dark={StaticResource BrandDark}}"
+                                         VerticalOptions="Start"
+                                         Margin="0,6,0,0"
+                                         IsVisible="{Binding ReadUtc, Converter={StaticResource IsNullConverter}}" />
 
-                            <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                <Label Text="{Binding Title}" Style="{StaticResource ListItemTitle}" />
-                                <Label Text="{Binding Body}" />
-                                <Label Text="{Binding CreatedUtc, StringFormat='{0:dddd, MMM d • HH:mm}'}"
-                                       Style="{StaticResource Caption}" />
-                            </VerticalStackLayout>
-                        </Grid>
+                                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                    <Label Text="{Binding Title}"
+                                           Style="{StaticResource ListItemTitle}" />
+                                    <Label Text="{Binding Body}" />
+                                    <Label Text="{Binding CreatedUtc, StringFormat='{0:dddd, MMM d • HH\\:mm}'}"
+                                           Style="{StaticResource Caption}"
+                                           Margin="0,4,0,0" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
+
                 <CollectionView.EmptyView>
-                    <ContentView>
+                    <ContentView Padding="{StaticResource SpacingXL}">
                         <Label Text="No notifications yet."
                                Style="{StaticResource Caption}"
                                HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               Padding="{StaticResource SpacingXL}" />
+                               VerticalOptions="Center" />
                     </ContentView>
                 </CollectionView.EmptyView>
             </CollectionView>

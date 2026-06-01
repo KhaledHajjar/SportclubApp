@@ -7,41 +7,64 @@
              Title="{Binding Title}"
              Shell.NavBarIsVisible="False">
 
-    <Grid Padding="{StaticResource PagePadding}" RowDefinitions="*,Auto,*">
-        <VerticalStackLayout Grid.Row="1" Spacing="{StaticResource SpacingM}">
-            <Label Text="Sportclub"
-                   Style="{StaticResource HeroTitle}" />
-            <Label Text="Sign in to manage your classes"
-                   Style="{StaticResource Caption}"
-                   HorizontalOptions="Center"
-                   Margin="{StaticResource MarginBottomM}" />
+    <ScrollView>
+        <Grid Padding="24" RowDefinitions="*,Auto,*" MinimumHeightRequest="640">
+            <VerticalStackLayout Grid.Row="1" Spacing="{StaticResource SpacingM}">
 
-            <Entry Placeholder="Email"
-                   Keyboard="Email"
-                   Text="{Binding Email}" />
-            <Entry Placeholder="Password"
-                   IsPassword="True"
-                   Text="{Binding Password}" />
+                <Border Style="{StaticResource BrandMonogram}" HorizontalOptions="Center">
+                    <Label Text="S"
+                           TextColor="{StaticResource White}"
+                           FontFamily="OpenSansSemibold"
+                           FontSize="40"
+                           CharacterSpacing="-1"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                </Border>
 
-            <Button Text="Sign in"
-                    Style="{StaticResource AccentButton}"
-                    Command="{Binding SignInCommand}"
-                    IsEnabled="{Binding IsNotBusy}" />
+                <Label Text="SPORTCLUB"
+                       Style="{StaticResource UppercaseMuted}"
+                       HorizontalOptions="Center"
+                       CharacterSpacing="4"
+                       Margin="0,8,0,0" />
 
-            <ActivityIndicator IsRunning="{Binding IsBusy}"
-                               IsVisible="{Binding IsBusy}"
-                               HorizontalOptions="Center" />
+                <Label Text="Welcome back"
+                       Style="{StaticResource HeroTitle}"
+                       HorizontalOptions="Center"
+                       Margin="0,0,0,20" />
 
-            <Label Text="{Binding ErrorMessage}"
-                   Style="{StaticResource ErrorText}"
-                   IsVisible="{Binding HasError}"
-                   HorizontalOptions="Center" />
+                <Border Style="{StaticResource FormField}">
+                    <Entry Placeholder="Email"
+                           Keyboard="Email"
+                           Text="{Binding Email}" />
+                </Border>
 
-            <Button Text="Create account"
-                    Style="{StaticResource LinkButton}"
-                    Command="{Binding GoToRegisterCommand}"
-                    HorizontalOptions="Center"
-                    Margin="{StaticResource MarginTopM}" />
-        </VerticalStackLayout>
-    </Grid>
+                <Border Style="{StaticResource FormField}">
+                    <Entry Placeholder="Password"
+                           IsPassword="True"
+                           Text="{Binding Password}" />
+                </Border>
+
+                <Button Text="Sign in"
+                        Style="{StaticResource AccentButton}"
+                        Command="{Binding SignInCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        Margin="0,12,0,0" />
+
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   HorizontalOptions="Center" />
+
+                <Label Text="{Binding ErrorMessage}"
+                       Style="{StaticResource ErrorText}"
+                       IsVisible="{Binding HasError}"
+                       HorizontalOptions="Center" />
+
+                <Button Text="Create account"
+                        Style="{StaticResource LinkButton}"
+                        Command="{Binding GoToRegisterCommand}"
+                        HorizontalOptions="Center"
+                        Margin="0,12,0,0" />
+            </VerticalStackLayout>
+        </Grid>
+    </ScrollView>
 </ContentPage>

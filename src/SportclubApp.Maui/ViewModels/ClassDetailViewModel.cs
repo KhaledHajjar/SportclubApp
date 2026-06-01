@@ -13,6 +13,10 @@ public sealed partial class ClassDetailViewModel(
     INavigationService navigation,
     INotificationsBadgeService badge) : BaseViewModel
 {
+    // Raised after the user successfully reserves the current class so the
+    // page can play the inline success overlay animation.
+    public event EventHandler? ReservationConfirmed;
+
     [ObservableProperty]
     private Guid _classId;
 
@@ -151,7 +155,7 @@ public sealed partial class ClassDetailViewModel(
             HasActiveReservation = true;
             await LoadAsync();
             await badge.RefreshAsync();
-            await navigation.DisplayAlertAsync("Reserved", "You're booked into this class.");
+            ReservationConfirmed?.Invoke(this, EventArgs.Empty);
         }
         catch (ApiException ex)
         {
