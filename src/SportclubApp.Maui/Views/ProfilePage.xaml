@@ -63,11 +63,9 @@
                 <Label Text="Subscription" Style="{StaticResource SectionTitle}" />
 
                 <VerticalStackLayout IsVisible="{Binding HasSubscription}" Spacing="{StaticResource SpacingXS}">
-                    <Label Text="{Binding SubscriptionTypeText}" FontSize="{StaticResource FontSizeBodyLarge}" />
+                    <Label Text="{Binding PlanNameText}" FontSize="{StaticResource FontSizeBodyLarge}" />
+                    <Label Text="{Binding PlanTierText}" Style="{StaticResource Caption}" />
                     <Label Text="{Binding SubscriptionEndsText}" />
-                    <Label Text="{Binding RemainingVisitsText}"
-                           IsVisible="{Binding HasRemainingVisits}"
-                           Style="{StaticResource SuccessText}" />
                 </VerticalStackLayout>
 
                 <Label Text="No active subscription."

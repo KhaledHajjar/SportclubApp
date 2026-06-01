@@ -55,12 +55,12 @@ The seeder is idempotent — re-running it on an already-populated database is a
 
 All seed users use the password **`Test1234!`**.
 
-| Email | Role | Subscription | Demonstrates |
+| Email | Role | Plan | Demonstrates |
 |---|---|---|---|
-| `alice@sportclub.test` | Member | TwicePerWeek | 2x/week limit; cancel her Yoga Tuesday 09:00 reservation to trigger the slot-opened notification flow for Charlie |
-| `bob@sportclub.test` | Member | Yearly (40 days remaining) | 6-week subscription-expiry local notification fires immediately on login |
-| `charlie@sportclub.test` | Member | Unlimited | Head of waitlist for the demo class — receives the slot-opened notification when Alice cancels |
-| `test@test.com` | Member | TwicePerWeek | Quick-login convenience account; second on the demo waitlist |
+| `alice@sportclub.test` | Member | Standard Monthly (10 days remaining) | Standard cancellation lockout (1 h); cancel her Yoga Tuesday 09:00 reservation to trigger the slot-opened notification flow for Charlie |
+| `bob@sportclub.test` | Member | Standard Yearly (40 days remaining) | Yearly billing → the 6-week subscription-expiry local notification fires on login |
+| `charlie@sportclub.test` | Member | Premium Monthly (15 days remaining) | Premium cancellation lockout (15 min); head of waitlist for the demo class — receives the slot-opened notification when Alice cancels |
+| `test@test.com` | Member | Standard Monthly (20 days remaining) | Quick-login convenience account; second on the demo waitlist |
 | `diana@sportclub.test` | Instructor | — | Instructor view: her teaching schedule and class participants |
 
 Each non-instructor account also has ~5 attendance rows across the past 6 weeks (History tab non-empty), 2 active future reservations (My classes non-empty), and one already-read SlotOpened notification (Notifications tab non-empty).
@@ -71,13 +71,17 @@ Each non-instructor account also has ~5 attendance rows across the past 6 weeks 
 
 The seeder creates one Yoga session capped at 2 — the next Tuesday 09:00 — pre-reserved by Alice and Bob, with Charlie at position 1 and Test at position 2 on the waitlist. To trigger the slot-opened flow:
 
-1. Log in as **alice@sportclub.test**, open *My classes*, cancel the Yoga Tuesday 09:00 reservation. (Cancel requires ≥ 1 hour before start; the demo class is always at least 12 hours out.)
+1. Log in as **alice@sportclub.test**, open *My classes*, cancel the Yoga Tuesday 09:00 reservation. (Alice is on the Standard tier, so cancellation requires ≥ 1 hour before start; the demo class is always at least 12 hours out.)
 2. Log out, log in as **charlie@sportclub.test**.
 3. The Notifications tab title shows `(1)`. Tap the new entry — it deep-links to the class detail and clears the badge. Charlie also has a fresh active reservation for that class (he was promoted off the waitlist).
 
 ### Subscription-expiry local notification
 
-Bob's yearly subscription ends 40 days from seed time, inside the 6-week threshold. Logging in as **bob@sportclub.test** schedules an OS-level local notification immediately via `Plugin.LocalNotification` — visible in the Android emulator's notification drawer (or iOS notification center) once the device clock crosses the scheduled time.
+The expiry-warning lead time depends on the plan's billing period (Yearly: 6 weeks, Monthly: 1 week). Bob's Standard Yearly subscription ends 40 days from seed time — inside the 6-week threshold — so logging in as **bob@sportclub.test** schedules an OS-level local notification immediately via `Plugin.LocalNotification`. It's visible in the Android emulator's notification drawer (or iOS notification center) once the device clock crosses the scheduled time.
+
+### Tier-based cancellation lockout
+
+Alice (Standard) can cancel up to 1 hour before class start; Charlie (Premium) can cancel up to 15 minutes before. The lockout is chosen at runtime by `IPlanCancellationPolicy` (Strategy pattern: `StandardPlanPolicy` vs `PremiumPlanPolicy`). To demo, reserve a class that starts in ~30 minutes for both a Standard and a Premium member (e.g. via Scalar `POST /api/v1/classes/{classId}/reservations`) and attempt to cancel — the Standard cancel returns 409 `cancel-too-late`; the Premium cancel succeeds.
 
 ## Run the API
 
@@ -125,7 +129,7 @@ On the iOS simulator the API base URL `https://localhost:5001` resolves to the h
 |---|---|
 | Dependency Injection | API + MAUI throughout |
 | MVVM | every MAUI page / view model |
-| Strategy | `ISubscriptionLimitPolicy` (`TwicePerWeekPolicy`, `UnlimitedPolicy`) |
+| Strategy | `IPlanCancellationPolicy` (`StandardPlanPolicy`, `PremiumPlanPolicy`) — chooses the cancellation lockout per plan tier |
 | Observer / Mediator | `IDomainEventDispatcher` + `SlotOpenedEvent` + handlers |
 | Repository (via EF) | `AppDbContext` + `DbSet<T>` |
 
@@ -148,7 +152,7 @@ The following are known limitations of the PoC. They're tolerated for the scope 
 
 ### Waitlist promotion bypasses reservation rules
 
-`WaitingListPromotionService.TryPromoteHeadAsync` writes a `Reservation` directly without consulting `ISubscriptionLimitPolicy`, the active-subscription check, or the 7-day window. This is **intentional**: by joining the waitlist a member explicitly opts in to a visit that may exceed their weekly limit. Anyone tempted to "fix" this should treat it as a product decision, not a bug.
+`WaitingListPromotionService.TryPromoteHeadAsync` writes a `Reservation` directly without re-running the active-subscription check or the 7-day booking window. This is **intentional**: by joining the waitlist a member explicitly opted in to that class, regardless of any state change in the interim (subscription lapsed, booking window now stricter, etc.). Anyone tempted to "fix" this should treat it as a product decision, not a bug.
 
 ## Definition of Done — per user story
 

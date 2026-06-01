@@ -16,6 +16,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<WaitingListEntry> WaitingListEntries => Set<WaitingListEntry>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
+    public DbSet<Plan> Plans => Set<Plan>();
     public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
@@ -94,10 +95,19 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
             b.HasIndex(w => new { w.ClassSessionId, w.Position });
         });
 
+        builder.Entity<Plan>(b =>
+        {
+            b.Property(p => p.Name).IsRequired().HasMaxLength(100);
+            b.Property(p => p.Tier).HasConversion<int>();
+            b.Property(p => p.BillingPeriod).HasConversion<int>();
+            b.Property(p => p.Price).HasPrecision(10, 2);
+            b.HasIndex(p => new { p.Tier, p.BillingPeriod });
+        });
+
         builder.Entity<Subscription>(b =>
         {
-            b.Property(s => s.Type).HasConversion<int>();
             b.HasOne(s => s.Member).WithMany(m => m.Subscriptions).HasForeignKey(s => s.MemberId).OnDelete(DeleteBehavior.Cascade);
+            b.HasOne(s => s.Plan).WithMany(p => p.Subscriptions).HasForeignKey(s => s.PlanId).OnDelete(DeleteBehavior.Restrict);
             b.HasIndex(s => new { s.MemberId, s.EndUtc });
         });
 

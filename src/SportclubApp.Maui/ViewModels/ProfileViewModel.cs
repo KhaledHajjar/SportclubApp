@@ -44,10 +44,9 @@ public sealed partial class ProfileViewModel(
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSubscription))]
-    [NotifyPropertyChangedFor(nameof(SubscriptionTypeText))]
+    [NotifyPropertyChangedFor(nameof(PlanNameText))]
+    [NotifyPropertyChangedFor(nameof(PlanTierText))]
     [NotifyPropertyChangedFor(nameof(SubscriptionEndsText))]
-    [NotifyPropertyChangedFor(nameof(RemainingVisitsText))]
-    [NotifyPropertyChangedFor(nameof(HasRemainingVisits))]
     private SubscriptionDto? _subscription;
 
     public string InitialsFallback => string.Concat(
@@ -56,23 +55,17 @@ public sealed partial class ProfileViewModel(
 
     public bool HasSubscription => Subscription is not null;
 
-    public string SubscriptionTypeText => Subscription?.Type switch
+    public string PlanNameText => Subscription?.Plan.Name ?? "—";
+
+    public string PlanTierText => Subscription?.Plan.Tier switch
     {
-        SubscriptionType.TwicePerWeek => "Twice per week",
-        SubscriptionType.Yearly => "Yearly",
-        SubscriptionType.Unlimited => "Unlimited",
-        _ => "—",
+        PlanTier.Standard => "Standard tier",
+        PlanTier.Premium => "Premium tier",
+        _ => string.Empty,
     };
 
     public string SubscriptionEndsText =>
         Subscription is null ? "—" : $"Ends {Subscription.EndUtc.LocalDateTime:d}";
-
-    public string RemainingVisitsText =>
-        Subscription?.RemainingWeeklyVisits is { } remaining
-            ? $"{remaining} of 2 visits left this week"
-            : string.Empty;
-
-    public bool HasRemainingVisits => Subscription?.RemainingWeeklyVisits is not null;
 
     public ProfileViewModel ConfigureTitle()
     {

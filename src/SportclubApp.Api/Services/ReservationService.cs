@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using SportclubApp.Api.Common;
 using SportclubApp.Api.Data;
 using SportclubApp.Api.Entities;
 using SportclubApp.Api.Services.Policies;
@@ -11,12 +10,11 @@ namespace SportclubApp.Api.Services;
 
 public sealed class ReservationService(
     AppDbContext db,
-    ISubscriptionLimitPolicyFactory policyFactory,
+    IPlanCancellationPolicyFactory cancellationPolicies,
     IWaitingListPromotionService waitingListPromotion,
     TimeProvider time) : IReservationService
 {
     public static readonly TimeSpan ReservationWindow = TimeSpan.FromDays(7);
-    public static readonly TimeSpan CancellationLockout = TimeSpan.FromHours(1);
 
     public async Task<ReservationResult> ReserveAsync(Guid memberId, Guid classSessionId, CancellationToken ct)
     {
@@ -59,26 +57,11 @@ public sealed class ReservationService(
             return ReservationResult.Fail(ReservationErrorTypes.ClassFull, "Class is full. Join the waiting list instead.");
         }
 
-        var subscription = await db.Subscriptions
-            .Where(s => s.MemberId == memberId && s.StartUtc <= now && s.EndUtc > now)
-            .OrderByDescending(s => s.EndUtc)
-            .FirstOrDefaultAsync(ct);
-        if (subscription is null)
+        var hasActiveSubscription = await db.Subscriptions.AnyAsync(
+            s => s.MemberId == memberId && s.StartUtc <= now && s.EndUtc > now, ct);
+        if (!hasActiveSubscription)
         {
             return ReservationResult.Fail(ReservationErrorTypes.NoActiveSubscription, "No active subscription.");
-        }
-
-        var (weekStart, weekEnd) = IsoWeek.GetCurrentRange(now);
-        var weeklyCount = await db.Reservations.CountAsync(
-            r => r.MemberId == memberId
-                 && r.Status == ReservationStatus.Active
-                 && r.ClassSession.StartUtc >= weekStart
-                 && r.ClassSession.StartUtc < weekEnd, ct);
-
-        var policy = policyFactory.GetFor(subscription.Type);
-        if (!policy.CanReserve(weeklyCount))
-        {
-            return ReservationResult.Fail(ReservationErrorTypes.WeeklyLimitReached, "Weekly visit limit reached for your subscription.");
         }
 
         var reservation = new Reservation
@@ -138,9 +121,24 @@ public sealed class ReservationService(
             return ReservationResult.Fail(ReservationErrorTypes.ReservationNotFound, "Reservation is no longer active.");
         }
 
-        if (reservation.ClassSession.StartUtc - now < CancellationLockout)
+        // Cancellation lockout is plan-tier-driven (Strategy):
+        // Standard members get 1h, Premium get 15min. If the member has no
+        // active subscription at the moment of cancel, fall back to Standard.
+        var activeTier = await db.Subscriptions
+            .Where(s => s.MemberId == memberId && s.StartUtc <= now && s.EndUtc > now)
+            .OrderByDescending(s => s.EndUtc)
+            .Select(s => (PlanTier?)s.Plan.Tier)
+            .FirstOrDefaultAsync(ct);
+
+        var lockout = cancellationPolicies
+            .GetFor(activeTier ?? PlanTier.Standard)
+            .CancellationLockout;
+
+        if (reservation.ClassSession.StartUtc - now < lockout)
         {
-            return ReservationResult.Fail(ReservationErrorTypes.CancelTooLate, "Cancellation is only allowed up to one hour before class start.");
+            return ReservationResult.Fail(
+                ReservationErrorTypes.CancelTooLate,
+                $"Cancellation is only allowed up to {FormatLockout(lockout)} before class start.");
         }
 
         reservation.Status = ReservationStatus.Cancelled;
@@ -174,4 +172,9 @@ public sealed class ReservationService(
                 r.ClassSession.Location.Name))
             .ToListAsync(ct);
     }
+
+    private static string FormatLockout(TimeSpan lockout) =>
+        lockout.TotalHours >= 1
+            ? $"{lockout.TotalHours:0} hour{(lockout.TotalHours >= 2 ? "s" : string.Empty)}"
+            : $"{lockout.TotalMinutes:0} minutes";
 }

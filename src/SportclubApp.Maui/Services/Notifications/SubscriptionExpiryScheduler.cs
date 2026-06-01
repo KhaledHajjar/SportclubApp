@@ -8,18 +8,26 @@ namespace SportclubApp.Maui.Services.Notifications;
 public sealed class SubscriptionExpiryScheduler : ISubscriptionExpiryScheduler
 {
     private const int NotificationId = 1001;
-    private static readonly TimeSpan WarnBefore = TimeSpan.FromDays(42);
+    private static readonly TimeSpan MonthlyWarnBefore = TimeSpan.FromDays(7);
+    private static readonly TimeSpan YearlyWarnBefore = TimeSpan.FromDays(42);
 
     public async Task EnsureScheduledAsync(SubscriptionDto? subscription)
     {
         LocalNotificationCenter.Current.Cancel(NotificationId);
 
-        if (subscription is null || subscription.Type != SubscriptionType.Yearly)
+        if (subscription is null)
         {
             return;
         }
 
-        var fireAt = subscription.EndUtc - WarnBefore;
+        var warnBefore = subscription.Plan.BillingPeriod switch
+        {
+            BillingPeriod.Yearly => YearlyWarnBefore,
+            BillingPeriod.Monthly => MonthlyWarnBefore,
+            _ => MonthlyWarnBefore,
+        };
+
+        var fireAt = subscription.EndUtc - warnBefore;
         if (fireAt <= DateTimeOffset.UtcNow)
         {
             return;
@@ -35,7 +43,7 @@ public sealed class SubscriptionExpiryScheduler : ISubscriptionExpiryScheduler
         {
             NotificationId = NotificationId,
             Title = "Your subscription expires soon",
-            Description = $"Your yearly subscription expires on {subscription.EndUtc.LocalDateTime:d}. Renew to keep going.",
+            Description = $"Your subscription expires on {subscription.EndUtc.LocalDateTime:d}. Renew to keep going.",
             Schedule =
             {
                 NotifyTime = fireAt,

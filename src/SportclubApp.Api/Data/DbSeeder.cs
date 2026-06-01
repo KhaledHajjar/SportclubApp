@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SportclubApp.Api.Common;
 using SportclubApp.Api.Entities;
 using SportclubApp.Shared.Auth;
 using SportclubApp.Shared.Enums;
@@ -28,99 +27,229 @@ public sealed class DbSeeder(
 
         var now = DateTimeOffset.UtcNow;
 
-        // ---- Workouts and locations ----
-        var workouts = new[]
+        // ---- Plan catalog ----
+        var standardMonthly = new Plan
         {
-            new Workout { Id = Guid.NewGuid(), Name = "Yoga", Description = "Vinyasa flow yoga for all levels.", DurationMinutes = 60 },
-            new Workout { Id = Guid.NewGuid(), Name = "HIIT", Description = "High-intensity interval training.", DurationMinutes = 45 },
-            new Workout { Id = Guid.NewGuid(), Name = "Spinning", Description = "Indoor cycling with music.", DurationMinutes = 50 },
-            new Workout { Id = Guid.NewGuid(), Name = "Pilates", Description = "Core strength and flexibility.", DurationMinutes = 55 },
+            Id = Guid.NewGuid(),
+            Name = "Standard Monthly",
+            Tier = PlanTier.Standard,
+            BillingPeriod = BillingPeriod.Monthly,
+            DurationDays = 30,
+            Price = 29.95m,
         };
-        var locations = new[]
+        var standardYearly = new Plan
         {
-            new Location { Id = Guid.NewGuid(), Name = "Studio 1", Address = "Main gym, ground floor" },
-            new Location { Id = Guid.NewGuid(), Name = "Studio 2", Address = "Spinning room, first floor" },
+            Id = Guid.NewGuid(),
+            Name = "Standard Yearly",
+            Tier = PlanTier.Standard,
+            BillingPeriod = BillingPeriod.Yearly,
+            DurationDays = 365,
+            Price = 299.00m,
         };
+        var premiumMonthly = new Plan
+        {
+            Id = Guid.NewGuid(),
+            Name = "Premium Monthly",
+            Tier = PlanTier.Premium,
+            BillingPeriod = BillingPeriod.Monthly,
+            DurationDays = 30,
+            Price = 44.95m,
+        };
+        var premiumYearly = new Plan
+        {
+            Id = Guid.NewGuid(),
+            Name = "Premium Yearly",
+            Tier = PlanTier.Premium,
+            BillingPeriod = BillingPeriod.Yearly,
+            DurationDays = 365,
+            Price = 449.00m,
+        };
+        var plans = new[] { standardMonthly, standardYearly, premiumMonthly, premiumYearly };
+        await db.Plans.AddRangeAsync(plans, ct);
+
+        // ---- Workouts ----
+        var yoga = new Workout
+        {
+            Id = Guid.NewGuid(),
+            Name = "Yoga",
+            Description = "Vinyasa flow linking breath with movement. Suitable for all levels — modifications offered throughout. Bring your own mat or borrow one at reception.",
+            DurationMinutes = 60,
+        };
+        var hiit = new Workout
+        {
+            Id = Guid.NewGuid(),
+            Name = "HIIT",
+            Description = "High-intensity interval training: thirty-second work sets with fifteen-second rests across functional and cardio stations. Intermediate to advanced; wear supportive shoes.",
+            DurationMinutes = 45,
+        };
+        var spinning = new Workout
+        {
+            Id = Guid.NewGuid(),
+            Name = "Spinning",
+            Description = "Indoor cycling with themed playlists, hill profiles and sprint sets. The resistance dial is yours — all fitness levels welcome. Cycling shoes optional, clip-in pedals provided.",
+            DurationMinutes = 50,
+        };
+        var pilates = new Workout
+        {
+            Id = Guid.NewGuid(),
+            Name = "Pilates",
+            Description = "Mat-based Pilates focused on core stability, posture and controlled mobility. Suitable for all levels; participants with chronic injuries please check in with the instructor first.",
+            DurationMinutes = 55,
+        };
+        var workouts = new[] { yoga, hiit, spinning, pilates };
         await db.Workouts.AddRangeAsync(workouts, ct);
+
+        // ---- Locations ----
+        var deLoft = new Location
+        {
+            Id = Guid.NewGuid(),
+            Name = "De Loft",
+            Address = "Top floor, north wing — wooden floor, mirror wall, props rack.",
+        };
+        var cycleStudio = new Location
+        {
+            Id = Guid.NewGuid(),
+            Name = "Cycle Studio",
+            Address = "Ground floor, west wing — twenty stationary bikes with surround sound.",
+        };
+        var sportzaal = new Location
+        {
+            Id = Guid.NewGuid(),
+            Name = "Sportzaal",
+            Address = "Ground floor, east wing — open functional-training hall with rowers, kettlebells and a sprint track.",
+        };
+        var locations = new[] { deLoft, cycleStudio, sportzaal };
         await db.Locations.AddRangeAsync(locations, ct);
 
-        var yoga = workouts.First(w => w.Name == "Yoga");
-
         // ---- Users (Diana first so the Instructor entity can reference her MemberId) ----
-        var diana = await CreateUserAsync("diana@sportclub.test", "Diana", "Smit", AuthRoles.Instructor, ct);
-        var alice = await CreateUserAsync("alice@sportclub.test", "Alice", "de Vries", AuthRoles.Member, ct);
-        var bob = await CreateUserAsync("bob@sportclub.test", "Bob", "Jansen", AuthRoles.Member, ct);
-        var charlie = await CreateUserAsync("charlie@sportclub.test", "Charlie", "Bakker", AuthRoles.Member, ct);
-        var test = await CreateUserAsync("test@test.com", "Test", "User", AuthRoles.Member, ct);
+        var diana = await CreateUserAsync(
+            "diana@sportclub.test", "Diana", "Smit", new DateOnly(1985, 4, 15), AuthRoles.Instructor, ct);
+        var alice = await CreateUserAsync(
+            "alice@sportclub.test", "Alice", "de Vries", new DateOnly(1995, 8, 22), AuthRoles.Member, ct);
+        var bob = await CreateUserAsync(
+            "bob@sportclub.test", "Bob", "Jansen", new DateOnly(1988, 2, 10), AuthRoles.Member, ct);
+        var charlie = await CreateUserAsync(
+            "charlie@sportclub.test", "Charlie", "Bakker", new DateOnly(1992, 11, 30), AuthRoles.Member, ct);
+        var test = await CreateUserAsync(
+            "test@test.com", "Test", "User", new DateOnly(2000, 1, 15), AuthRoles.Member, ct);
 
         // ---- Instructors ----
-        var instructors = new[]
+        var dianaInstructor = new Instructor
         {
-            new Instructor { Id = Guid.NewGuid(), FirstName = "Diana", LastName = "Smit", Bio = "Senior coach.", MemberId = diana.Id },
-            new Instructor { Id = Guid.NewGuid(), FirstName = "John", LastName = "Smith", Bio = "Cycling specialist." },
-            new Instructor { Id = Guid.NewGuid(), FirstName = "Jane", LastName = "Doe", Bio = "Yoga and Pilates teacher." },
+            Id = Guid.NewGuid(),
+            FirstName = "Diana",
+            LastName = "Smit",
+            Bio = "Yoga Alliance E-RYT500 since 2014. Diana studied vinyasa in Mysore and teaches a strong, breath-led flow tailored to all bodies. She also leads the gym's mat Pilates programme.",
+            MemberId = diana.Id,
         };
+        var marcoInstructor = new Instructor
+        {
+            Id = Guid.NewGuid(),
+            FirstName = "Marco",
+            LastName = "Vermeer",
+            Bio = "Former Dutch track cyclist turned spin coach. Marco's hour-long rides mix themed playlists with interval and hill profiles — leave your watt meter at the door and just chase the beat.",
+        };
+        var evaInstructor = new Instructor
+        {
+            Id = Guid.NewGuid(),
+            FirstName = "Eva",
+            LastName = "Hendriks",
+            Bio = "ACE-certified personal trainer and HIIT specialist. Eva's circuits push you hard but keep technique honest; modifications are always on offer for first-timers and seasoned athletes alike.",
+        };
+        var instructors = new[] { dianaInstructor, marcoInstructor, evaInstructor };
         await db.Instructors.AddRangeAsync(instructors, ct);
 
+        // ---- Workout → instructor + location mapping (each workout is consistently taught and located) ----
+        var workoutInstructor = new Dictionary<Guid, Guid>
+        {
+            [yoga.Id] = dianaInstructor.Id,
+            [pilates.Id] = dianaInstructor.Id,
+            [spinning.Id] = marcoInstructor.Id,
+            [hiit.Id] = evaInstructor.Id,
+        };
+        var workoutLocation = new Dictionary<Guid, Guid>
+        {
+            [yoga.Id] = deLoft.Id,
+            [pilates.Id] = deLoft.Id,
+            [spinning.Id] = cycleStudio.Id,
+            [hiit.Id] = sportzaal.Id,
+        };
+
         // ---- Subscriptions ----
+        // alice    Standard Monthly  ends in 10 days   common case
+        // bob      Standard Yearly   ends in 40 days   inside 6-week expiry warning window (US-10)
+        // charlie  Premium Monthly   ends in 15 days   demo target for tier-based cancellation lockout
+        // test     Standard Monthly  ends in 20 days   quick-login convenience
         db.Subscriptions.AddRange(
             new Subscription
             {
                 Id = Guid.NewGuid(),
                 MemberId = alice.Id,
-                Type = SubscriptionType.TwicePerWeek,
-                StartUtc = now.AddDays(-30),
-                EndUtc = now.AddMonths(6),
+                PlanId = standardMonthly.Id,
+                StartUtc = now.AddDays(-20),
+                EndUtc = now.AddDays(10),
             },
             new Subscription
             {
                 Id = Guid.NewGuid(),
                 MemberId = bob.Id,
-                Type = SubscriptionType.Yearly,
-                StartUtc = now.AddDays(-30),
-                // 40 days remaining → triggers the 6-week subscription-expiry local notification on login
+                PlanId = standardYearly.Id,
+                StartUtc = now.AddDays(-325),
                 EndUtc = now.AddDays(40),
             },
             new Subscription
             {
                 Id = Guid.NewGuid(),
                 MemberId = charlie.Id,
-                Type = SubscriptionType.Unlimited,
-                StartUtc = now.AddDays(-30),
-                EndUtc = now.AddYears(1),
+                PlanId = premiumMonthly.Id,
+                StartUtc = now.AddDays(-15),
+                EndUtc = now.AddDays(15),
             },
             new Subscription
             {
                 Id = Guid.NewGuid(),
                 MemberId = test.Id,
-                Type = SubscriptionType.TwicePerWeek,
-                StartUtc = now.AddDays(-30),
-                EndUtc = now.AddMonths(6),
+                PlanId = standardMonthly.Id,
+                StartUtc = now.AddDays(-10),
+                EndUtc = now.AddDays(20),
             });
 
-        // ---- Class sessions: 42 days past + 14 days future, 9:00 and 18:00 ----
+        // ---- Class sessions: 3 slots/day at 09:00, 12:30, 19:00 over 56 days ----
+        // 09:00 mind-body block, 12:30 interval block, 19:00 mixed evening block.
+        var morningRotation = new[] { yoga, pilates };
+        var lunchRotation = new[] { hiit, spinning };
+        var eveningRotation = new[] { yoga, spinning, pilates, hiit };
+
         var sessions = new List<ClassSession>();
         var startOfDay = new DateTimeOffset(DateOnly.FromDateTime(now.UtcDateTime).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-        var rotation = 0;
         for (var d = -42; d < 14; d++)
         {
             var day = startOfDay.AddDays(d);
-            foreach (var hour in new[] { 9, 18 })
+            var dayKey = d + 100; // keep the modulo positive even for negative offsets
+            var slots = new (double Hours, Workout Workout)[]
+            {
+                (9.0, morningRotation[dayKey % morningRotation.Length]),
+                (12.5, lunchRotation[dayKey % lunchRotation.Length]),
+                (19.0, eveningRotation[dayKey % eveningRotation.Length]),
+            };
+
+            foreach (var (hours, workout) in slots)
             {
                 sessions.Add(new ClassSession
                 {
                     Id = Guid.NewGuid(),
-                    StartUtc = day.AddHours(hour),
+                    StartUtc = day.AddHours(hours),
                     Capacity = 10,
-                    WorkoutId = workouts[rotation % workouts.Length].Id,
-                    InstructorId = instructors[rotation % instructors.Length].Id,
-                    LocationId = locations[rotation % locations.Length].Id,
+                    WorkoutId = workout.Id,
+                    InstructorId = workoutInstructor[workout.Id],
+                    LocationId = workoutLocation[workout.Id],
                 });
-                rotation++;
             }
         }
 
-        // ---- Waitlist demo class: first future Tuesday 09:00 with at least 12h headroom ----
+        // ---- Demo class: first future Tuesday 09:00 → Yoga at capacity 2 ----
+        // The 09:00 slot is always Yoga or Pilates by the rotation above, but force Yoga + cap 2
+        // here so the waitlist + slot-opened demo flow stays deterministic.
         var demoClass = sessions
             .Where(s => s.StartUtc > now.AddHours(12)
                         && s.StartUtc.UtcDateTime.DayOfWeek == DayOfWeek.Tuesday
@@ -128,9 +257,17 @@ public sealed class DbSeeder(
             .OrderBy(s => s.StartUtc)
             .First();
         demoClass.WorkoutId = yoga.Id;
+        demoClass.InstructorId = dianaInstructor.Id;
+        demoClass.LocationId = deLoft.Id;
         demoClass.Capacity = 2;
 
         await db.ClassSessions.AddRangeAsync(sessions, ct);
+
+        // ---- Member workout preferences (drives reservations + attendance) ----
+        var alicePrefs = new[] { yoga.Id, pilates.Id };                    // mind-body regular
+        var bobPrefs = new[] { yoga.Id, spinning.Id, hiit.Id, pilates.Id }; // generalist, anything goes
+        var charliePrefs = new[] { hiit.Id, spinning.Id };                  // high-intensity
+        var testPrefs = new[] { yoga.Id };                                  // occasional yoga drop-in
 
         // ---- Reservations ----
         var futurePool = sessions
@@ -138,38 +275,27 @@ public sealed class DbSeeder(
             .OrderBy(s => s.StartUtc)
             .ToList();
 
-        var (demoWeekStart, demoWeekEnd) = IsoWeek.GetCurrentRange(demoClass.StartUtc);
-
-        // Alice (TwicePerWeek): exactly 2 in the demo class's week
-        var aliceSecond = futurePool.First(s =>
-            s.StartUtc >= demoWeekStart && s.StartUtc < demoWeekEnd);
-
-        // Bob (Yearly): demo class + 1 in a later week
-        var bobSecond = futurePool.First(s => s.StartUtc >= demoWeekEnd);
-
-        // Charlie (Unlimited) and Test (TwicePerWeek): 2 each, different weeks, none being the demo class
-        var charlieFirst = futurePool.First(s =>
-            (s.StartUtc - now).TotalDays >= 3 && (s.StartUtc - now).TotalDays < 6);
-        var charlieSecond = futurePool.First(s =>
-            (s.StartUtc - now).TotalDays >= 9 && (s.StartUtc - now).TotalDays < 13
-            && s.Id != charlieFirst.Id);
-
-        var testFirst = futurePool.First(s =>
-            (s.StartUtc - now).TotalDays >= 4 && (s.StartUtc - now).TotalDays < 7
-            && s.Id != charlieFirst.Id);
-        var testSecond = futurePool.First(s =>
-            (s.StartUtc - now).TotalDays >= 10 && (s.StartUtc - now).TotalDays < 14
-            && s.Id != charlieSecond.Id);
+        ClassSession PickPreferred(ICollection<Guid> preferredWorkoutIds, int offset)
+        {
+            var filtered = futurePool
+                .Where(s => preferredWorkoutIds.Contains(s.WorkoutId))
+                .ToList();
+            return filtered.Count > 0
+                ? filtered[offset % filtered.Count]
+                : futurePool[offset % futurePool.Count];
+        }
 
         db.Reservations.AddRange(
+            // Demo class: alice + bob pre-booked (capacity 2 → cancelling alice triggers waitlist promotion for charlie)
             ReservationFor(alice, demoClass, now.AddDays(-2)),
-            ReservationFor(alice, aliceSecond, now.AddDays(-1)),
             ReservationFor(bob, demoClass, now.AddDays(-2)),
-            ReservationFor(bob, bobSecond, now.AddDays(-1)),
-            ReservationFor(charlie, charlieFirst, now.AddDays(-1)),
-            ReservationFor(charlie, charlieSecond, now.AddDays(-1)),
-            ReservationFor(test, testFirst, now.AddDays(-1)),
-            ReservationFor(test, testSecond, now.AddDays(-1)));
+            // Extras matched to each member's preferences
+            ReservationFor(alice, PickPreferred(alicePrefs, 1), now.AddDays(-1)),
+            ReservationFor(bob, PickPreferred(bobPrefs, 5), now.AddDays(-1)),
+            ReservationFor(charlie, PickPreferred(charliePrefs, 2), now.AddDays(-1)),
+            ReservationFor(charlie, PickPreferred(charliePrefs, 6), now.AddDays(-1)),
+            ReservationFor(test, PickPreferred(testPrefs, 3), now.AddDays(-1)),
+            ReservationFor(test, PickPreferred(testPrefs, 7), now.AddDays(-1)));
 
         // ---- Waitlist on the demo class: Charlie head, Test second ----
         db.WaitingListEntries.AddRange(
@@ -190,16 +316,16 @@ public sealed class DbSeeder(
                 CreatedUtc = now.AddHours(-12),
             });
 
-        // ---- Attendance: 5 rows per non-instructor, spread across the past 6 weeks ----
+        // ---- Attendance: 5 rows per non-instructor, drawn from preferred workouts ----
         var pastSessions = sessions
             .Where(s => s.StartUtc < now)
             .OrderBy(s => s.StartUtc)
             .ToList();
 
-        SeedAttendance(alice, pastSessions, workouts, offset: 0);
-        SeedAttendance(bob, pastSessions, workouts, offset: 3);
-        SeedAttendance(charlie, pastSessions, workouts, offset: 6);
-        SeedAttendance(test, pastSessions, workouts, offset: 9);
+        SeedAttendance(alice, pastSessions, workouts, alicePrefs, offset: 0);
+        SeedAttendance(bob, pastSessions, workouts, bobPrefs, offset: 3);
+        SeedAttendance(charlie, pastSessions, workouts, charliePrefs, offset: 6);
+        SeedAttendance(test, pastSessions, workouts, testPrefs, offset: 9);
 
         // ---- One already-read SlotOpened notification per non-instructor, so the tab isn't empty ----
         SeedReadNotification(alice, pastSessions, now, hashSeed: 0);
@@ -210,8 +336,8 @@ public sealed class DbSeeder(
         await db.SaveChangesAsync(ct);
 
         logger.LogInformation(
-            "Seeded {Workouts} workouts, {Locations} locations, {Instructors} instructors, {Members} members, {Sessions} sessions. Demo class {DemoClassId} at {DemoClassStart:u}.",
-            workouts.Length, locations.Length, instructors.Length, 5, sessions.Count, demoClass.Id, demoClass.StartUtc);
+            "Seeded {Plans} plans, {Workouts} workouts, {Locations} locations, {Instructors} instructors, {Members} members, {Sessions} sessions. Demo class {DemoClassId} at {DemoClassStart:u}.",
+            plans.Length, workouts.Length, locations.Length, instructors.Length, 5, sessions.Count, demoClass.Id, demoClass.StartUtc);
     }
 
     private static Reservation ReservationFor(Member member, ClassSession session, DateTimeOffset createdUtc) => new()
@@ -223,18 +349,28 @@ public sealed class DbSeeder(
         Status = ReservationStatus.Active,
     };
 
-    private void SeedAttendance(Member member, IReadOnlyList<ClassSession> pastSessions, Workout[] workouts, int offset)
+    private void SeedAttendance(
+        Member member,
+        IReadOnlyList<ClassSession> pastSessions,
+        Workout[] workouts,
+        ICollection<Guid> preferredWorkoutIds,
+        int offset)
     {
-        if (pastSessions.Count == 0)
+        var preferredPast = pastSessions
+            .Where(s => preferredWorkoutIds.Contains(s.WorkoutId))
+            .ToList();
+
+        var pool = preferredPast.Count >= 5 ? preferredPast : pastSessions;
+        if (pool.Count == 0)
         {
             return;
         }
 
-        var step = Math.Max(1, pastSessions.Count / 5);
+        var step = Math.Max(1, pool.Count / 5);
         for (var i = 0; i < 5; i++)
         {
-            var index = (offset + i * step) % pastSessions.Count;
-            var session = pastSessions[index];
+            var index = (offset + i * step) % pool.Count;
+            var session = pool[index];
             var workout = workouts.First(w => w.Id == session.WorkoutId);
             db.AttendanceRecords.Add(new AttendanceRecord
             {
@@ -271,7 +407,13 @@ public sealed class DbSeeder(
         });
     }
 
-    private async Task<Member> CreateUserAsync(string email, string firstName, string lastName, string role, CancellationToken ct)
+    private async Task<Member> CreateUserAsync(
+        string email,
+        string firstName,
+        string lastName,
+        DateOnly dateOfBirth,
+        string role,
+        CancellationToken ct)
     {
         var existing = await userManager.FindByEmailAsync(email);
         if (existing is not null)
@@ -286,6 +428,7 @@ public sealed class DbSeeder(
             Email = email,
             FirstName = firstName,
             LastName = lastName,
+            DateOfBirth = dateOfBirth,
             EmailConfirmed = true,
             CreatedUtc = DateTimeOffset.UtcNow,
         };

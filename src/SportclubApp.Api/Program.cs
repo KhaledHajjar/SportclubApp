@@ -19,7 +19,7 @@ builder.Services.AddJwtAuth(builder.Configuration);
 builder.Services.AddOpenApiWithBearer();
 
 builder.Services.AddSingleton(TimeProvider.System);
-builder.Services.AddSingleton<ISubscriptionLimitPolicyFactory, SubscriptionLimitPolicyFactory>();
+builder.Services.AddSingleton<IPlanCancellationPolicyFactory, PlanCancellationPolicyFactory>();
 builder.Services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
 builder.Services.AddScoped<IDomainEventHandler<SlotOpenedEvent>, SlotOpenedEventLoggingHandler>();
 builder.Services.AddScoped<IDomainEventHandler<SlotOpenedEvent>, SlotOpenedNotificationHandler>();
