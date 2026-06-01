@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Controls;
 using SportclubApp.Maui.Services.Api;
 using SportclubApp.Maui.Services.Navigation;
 using SportclubApp.Maui.Services.Notifications;
@@ -54,7 +55,10 @@ public sealed partial class ClassDetailViewModel(
 
     public bool IsFull => Session?.IsFull ?? false;
 
-    public bool CanReserve => Session is not null && !Session.IsFull && !HasActiveReservation;
+    // !IsBusy guards against a double-tap firing two HTTP reservations in
+    // parallel. The DB has a unique-active index that catches the duplicate,
+    // but the UI shouldn't get there in the first place.
+    public bool CanReserve => Session is not null && !Session.IsFull && !HasActiveReservation && !IsBusy;
 
     public bool IsOnWaitingList => WaitingListEntryId.HasValue;
 
@@ -88,6 +92,18 @@ public sealed partial class ClassDetailViewModel(
         if (value != Guid.Empty)
         {
             _ = LoadAsync();
+        }
+    }
+
+    protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        // IsBusy lives on BaseViewModel so we can't decorate it with
+        // [NotifyCanExecuteChangedFor] from here — hook the change manually.
+        if (e.PropertyName == nameof(IsBusy))
+        {
+            OnPropertyChanged(nameof(CanReserve));
+            ReserveCommand.NotifyCanExecuteChanged();
         }
     }
 

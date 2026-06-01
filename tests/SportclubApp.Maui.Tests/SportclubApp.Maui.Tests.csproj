@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <RootNamespace>SportclubApp.Maui.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,10 +13,40 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
     <PackageReference Include="xunit.v3" Version="3.2.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageReference Include="NSubstitute" Version="5.3.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SportclubApp.Shared\SportclubApp.Shared.csproj" />
+  </ItemGroup>
+
+  <!--
+    The MAUI project targets net10.0-android;net10.0-ios so we can't ProjectReference it
+    from a plain net10.0 test project. Link the ViewModel sources we need to test instead
+    — they only depend on CommunityToolkit.Mvvm and the Shared DTOs, no MAUI runtime types.
+  -->
+  <ItemGroup>
+    <Compile Include="..\..\src\SportclubApp.Maui\ViewModels\BaseViewModel.cs"
+             Link="Linked\ViewModels\BaseViewModel.cs" />
+    <Compile Include="..\..\src\SportclubApp.Maui\ViewModels\ClassDetailViewModel.cs"
+             Link="Linked\ViewModels\ClassDetailViewModel.cs" />
+    <Compile Include="..\..\src\SportclubApp.Maui\Services\Api\ApiException.cs"
+             Link="Linked\Services\Api\ApiException.cs" />
+    <Compile Include="..\..\src\SportclubApp.Maui\Services\Api\ISportclubApi.cs"
+             Link="Linked\Services\Api\ISportclubApi.cs" />
+    <Compile Include="..\..\src\SportclubApp.Maui\Services\Api\ReservationErrorMessages.cs"
+             Link="Linked\Services\Api\ReservationErrorMessages.cs" />
+    <Compile Include="..\..\src\SportclubApp.Maui\Services\Api\WaitingListErrorMessages.cs"
+             Link="Linked\Services\Api\WaitingListErrorMessages.cs" />
+    <Compile Include="..\..\src\SportclubApp.Maui\Services\Navigation\INavigationService.cs"
+             Link="Linked\Services\Navigation\INavigationService.cs" />
+    <Compile Include="..\..\src\SportclubApp.Maui\Services\Notifications\INotificationsBadgeService.cs"
+             Link="Linked\Services\Notifications\INotificationsBadgeService.cs" />
   </ItemGroup>
 
 </Project>
