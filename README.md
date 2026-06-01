@@ -15,6 +15,7 @@ ASP.NET Core Web API + .NET MAUI app where members can manage their subscription
 ```
 src/
 ├── SportclubApp.Api      ASP.NET Core Web API
+├── SportclubApp.Admin    Blazor Web App (Interactive Server) — read-only admin panel
 ├── SportclubApp.Maui     .NET MAUI client (Android + iOS)
 └── SportclubApp.Shared   DTOs, enums, error-type constants
 tests/
@@ -62,6 +63,7 @@ All seed users use the password **`Test1234!`**.
 | `charlie@sportclub.test` | Member | Premium Monthly (15 days remaining) | Premium cancellation lockout (15 min); head of waitlist for the demo class — receives the slot-opened notification when Alice cancels |
 | `test@test.com` | Member | Standard Monthly (20 days remaining) | Quick-login convenience account; second on the demo waitlist |
 | `diana@sportclub.test` | Instructor | — | Instructor view: her teaching schedule and class participants |
+| `admin@sportclub.test` | Admin | — | Blazor admin panel — Dashboard / Members / Plans / Class sessions / Reservations |
 
 Each non-instructor account also has ~5 attendance rows across the past 6 weeks (History tab non-empty), 2 active future reservations (My classes non-empty), and one already-read SlotOpened notification (Notifications tab non-empty).
 
@@ -92,6 +94,20 @@ dotnet run --project src/SportclubApp.Api
 - Scalar UI: `https://localhost:<port>/scalar/v1`
 - OpenAPI spec: `https://localhost:<port>/openapi/v1.json`
 - Use the Bearer button in Scalar after `POST /api/v1/auth/login` to authorize subsequent calls.
+
+## Run the admin panel (Blazor)
+
+The Blazor Web App is a small read-only dashboard for staff. It runs as a separate process and talks to the API over HTTPS — same auth flow as the MAUI client (JWT bearer with silent refresh). Start the API first, then in another terminal:
+
+```powershell
+dotnet run --project src/SportclubApp.Admin
+```
+
+Open the URL printed in the console (defaults to `https://localhost:7xxx` — exact port from `launchSettings.json`). Sign in with **`admin@sportclub.test`** / **`Test1234!`**. Non-admin accounts (alice/bob/charlie/test/diana) are refused at the login screen — only the `Admin` role can enter.
+
+What you can see: a dashboard with member/subscription/class/reservation counts, a searchable member directory, the plan catalog with active-subscription counts per plan, the class schedule for a configurable date range, and the 50 most recent reservations.
+
+The admin API surface is gated by `[Authorize(Roles = AuthRoles.Admin)]` — see `src/SportclubApp.Api/Controllers/AdminController.cs`. The Blazor project itself is intentionally minimal: a per-circuit `AdminAuthState` holds the JWT, and `AdminApi` (the typed `HttpClient`) attaches the Bearer + refreshes on 401 inline — *not* via a `DelegatingHandler`, because `IHttpClientFactory` resolves handlers from its own DI scope rather than the Blazor circuit's, so a scoped `AdminAuthState` in a delegating handler would always be empty. Each page is a Razor component that calls `IAdminApi`.
 
 ## Run the MAUI app — Android
 
@@ -140,7 +156,6 @@ On the iOS simulator the API base URL `https://localhost:5001` resolves to the h
 - Push notifications via FCM/APNs (replaced by in-app notifications + a local OS notification for subscription expiry)
 - Real email delivery
 - Multi-tenant / multi-club support
-- Blazor admin web app
 
 ## Limitations and future work
 

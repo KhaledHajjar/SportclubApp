@@ -6,6 +6,10 @@
 # Project planning notes — kept locally, not tracked
 PRD/
 
+# Markdown notes — keep only the root README, ignore everything else
+*.md
+!README.md
+
 # Runtime profile photo uploads — keep the directory marker, drop user content
 src/SportclubApp.Api/wwwroot/uploads/*
 !src/SportclubApp.Api/wwwroot/uploads/.gitkeep
