@@ -10,5 +10,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/SportclubApp.Api.Tests/SportclubApp.Api.Tests.csproj" />
     <Project Path="tests/SportclubApp.Maui.Tests/SportclubApp.Maui.Tests.csproj" />
+    <Project Path="tests/SportclubApp.Maui.UiTests/SportclubApp.Maui.UiTests.csproj" />
   </Folder>
 </Solution>

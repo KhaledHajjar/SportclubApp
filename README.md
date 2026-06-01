@@ -19,8 +19,9 @@ src/
 ├── SportclubApp.Maui     .NET MAUI client (Android + iOS)
 └── SportclubApp.Shared   DTOs, enums, error-type constants
 tests/
-├── SportclubApp.Api.Tests
-└── SportclubApp.Maui.Tests
+├── SportclubApp.Api.Tests     xUnit unit tests for the API services
+├── SportclubApp.Maui.Tests    xUnit unit tests for the MAUI view models
+└── SportclubApp.Maui.UiTests  Appium UI tests (Android emulator / device)
 PRD/                       Product requirements + implementation plan
 ```
 
@@ -130,6 +131,73 @@ dotnet build src/SportclubApp.Maui -t:Run -f net10.0-ios
 ```
 
 On the iOS simulator the API base URL `https://localhost:5001` resolves to the host correctly — no LAN-IP swap needed.
+
+## Tests
+
+Three test projects: two `xUnit` unit-test projects and one Appium-driven UI-test project.
+
+### Unit tests
+
+```powershell
+# all unit tests with TRX export
+dotnet test tests/SportclubApp.Api.Tests --logger "trx;LogFileName=api-tests.trx"
+dotnet test tests/SportclubApp.Maui.Tests --logger "trx;LogFileName=maui-tests.trx"
+```
+
+Results land in `tests/<project>/TestResults/`. The API tests spin up an in-memory SQLite database per test (`Microsoft.Data.Sqlite` + `EnsureCreated`) so they exercise the real EF Core mappings including the unique-filtered active-reservation index. NSubstitute is used to mock collaborators (`IWaitingListPromotionService`, `IDomainEventDispatcher`). `FakeTimeProvider` from `Microsoft.Extensions.TimeProvider.Testing` pins the clock.
+
+The MAUI test project links source files from `src/SportclubApp.Maui/ViewModels/` and `src/SportclubApp.Maui/Services/` directly into a `net10.0` test assembly (the MAUI project itself targets `net10.0-android;net10.0-ios` so it can't be project-referenced from a plain `net10.0` test project). The linked sources only depend on `CommunityToolkit.Mvvm` and the `SportclubApp.Shared` DTOs — no MAUI runtime types.
+
+What the three unit tests defend:
+
+| Test | Defends |
+|---|---|
+| `ReservationServiceCancelTests` | Strategy pattern: Standard members are blocked from cancelling within 1 h of start; Premium members are allowed within 15 min. |
+| `WaitingListPromotionServiceTests` | Observer pattern: when a slot opens, the head of the waitlist is promoted and a `SlotOpenedEvent` is published. Followers shift up one position. |
+| `ClassDetailViewModelReserveTests` | Double-tap guard: the `ReserveCommand` reports `CanExecute = false` the moment a reservation request goes out, so a fast second tap cannot fire a second HTTP call. |
+
+### UI tests (Android, Appium)
+
+The UI tests drive the real MAUI app on an Android emulator (or physical device) via [Appium 2](https://appium.io/). They are real device-running tests — they install the APK, launch the app, tap UI elements and assert on rendered state.
+
+Prerequisites — install once:
+
+1. **Java 17+** (`java -version` must work).
+2. **Android SDK** with `platform-tools` and a system image — the Android Studio installer is the easiest path. Make sure `ANDROID_HOME` is set and `%ANDROID_HOME%\platform-tools` is on `PATH`.
+3. **An Android emulator running**, or a physical device with USB debugging enabled. Verify with `adb devices` — you should see at least one entry like `emulator-5554`.
+4. **Node.js 18+** and **Appium 2.x**:
+   ```powershell
+   npm install -g appium
+   appium driver install uiautomator2
+   ```
+5. **Build the MAUI Android APK**:
+   ```powershell
+   dotnet build src/SportclubApp.Maui -f net10.0-android -c Debug
+   ```
+   The signed debug APK lands at `src/SportclubApp.Maui/bin/Debug/net10.0-android/com.avans.sportclubapp-Signed.apk`. The csproj sets `EmbedAssembliesIntoApk=true` for the Android target so MAUI's Debug Fast Deployment is disabled — assemblies live inside the APK rather than being pushed separately by Visual Studio. Without that, Appium's `adb install` would leave the app crashing on launch (`monodroid: No assemblies found in '/data/user/0/.../.__override__/...'`).
+
+Running the tests:
+
+```powershell
+# 1. Start the API in another terminal (the app needs it to log in)
+dotnet run --project src/SportclubApp.Api
+
+# 2. Start Appium in another terminal — leave it running
+appium
+
+# 3. Run the tests (the harness finds the Debug APK automatically)
+dotnet test tests/SportclubApp.Maui.UiTests --logger "trx;LogFileName=ui-tests.trx"
+```
+
+Optional environment variables — overrides only, defaults work for the standard `dotnet build … -c Debug` workflow:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `SPORTCLUBAPP_APK_PATH` | `src/SportclubApp.Maui/bin/Debug/net10.0-android/com.avans.sportclubapp-Signed.apk` | Path to the APK |
+| `APPIUM_SERVER_URL` | `http://127.0.0.1:4723` | Appium server URL |
+| `SPORTCLUBAPP_DEVICE` | `emulator-5554` | adb device name or AVD |
+
+The UI tests use the seeded `test@test.com` / `Test1234!` account. Each test reinstalls the APK so it starts from a known signed-out state.
 
 ## Architecture
 

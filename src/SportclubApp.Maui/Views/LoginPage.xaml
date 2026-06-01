@@ -33,18 +33,21 @@
                        Margin="0,0,0,20" />
 
                 <Border Style="{StaticResource FormField}">
-                    <Entry Placeholder="Email"
+                    <Entry AutomationId="LoginEmail"
+                           Placeholder="Email"
                            Keyboard="Email"
                            Text="{Binding Email}" />
                 </Border>
 
                 <Border Style="{StaticResource FormField}">
-                    <Entry Placeholder="Password"
+                    <Entry AutomationId="LoginPassword"
+                           Placeholder="Password"
                            IsPassword="True"
                            Text="{Binding Password}" />
                 </Border>
 
-                <Button Text="Sign in"
+                <Button AutomationId="LoginSubmit"
+                        Text="Sign in"
                         Style="{StaticResource AccentButton}"
                         Command="{Binding SignInCommand}"
                         IsEnabled="{Binding IsNotBusy}"
