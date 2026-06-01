@@ -22,6 +22,18 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
+  <!--
+    Disable MAUI Debug Fast Deployment. Fast Deployment pushes the .NET
+    assemblies separately to /data/user/0/<pkg>/files/.__override__/ at deploy
+    time — Visual Studio handles this, but `adb install` (used by Appium UI
+    tests) does not. Without this property, Debug APKs installed via adb crash
+    on startup with "monodroid: No assemblies found".
+    Unconditional: the property is a no-op for non-Android targets.
+  -->
+  <PropertyGroup>
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+  </PropertyGroup>
+
   <ItemGroup>
     <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#F97316" />
     <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#F97316" BaseSize="128,128" />
